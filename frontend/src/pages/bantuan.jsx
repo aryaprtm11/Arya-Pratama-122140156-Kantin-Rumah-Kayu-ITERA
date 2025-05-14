@@ -1,55 +1,15 @@
-import IteraLogo from "../assets/itera.png";
-import BurgerMenu from "../component/BurgerMenu";
 import { useCart } from "./cart";
+import Navbar from "../component/Navbar";
+import { Box } from '@mui/material';
 
 const Bantuan = () => {
   const { toggleCart } = useCart();
 
   return (
-    <div className="bg-[#FDFAF6] min-h-screen font-poppins">
-        <nav className="fixed top-0 left-0 w-full z-50 bg-[#E4EFE7] p-6 py-6 shadow-lg rounded-b-xl">
-            <div className="flex justify-between items-center w-full px-6">
-                <div className="flex items-center gap-4">
-                    <img src={IteraLogo} alt="Logo Itera" className="h-10 w-auto" />
-                    <h1
-                    className="navbar-title font-semibold text-xl sm:text-2xl md:text-3xl ml-2"
-                    style={{ fontFamily: "Times New Roman, Times, serif" }}
-                    >
-                    Kantin Rumah Kayu ITERA
-                    </h1>
-                </div>
+    <Box className="bg-[#FDFAF6] min-h-screen font-poppins">
+        <Navbar toggleCart={toggleCart} activePage="bantuan" />
 
-                <ul className="hidden md:flex items-center gap-6 text-sm sm:text-base md:text-lg">
-                    <li>
-                        <a
-                            href="/"
-                            className="font-medium hover:bg-green-500 rounded-xl hover:text-white px-5 py-2"
-                        >
-                            Beranda
-                        </a>
-                    </li>
-                    <li>
-                        <a
-                            href="/order"
-                            className="font-medium hover:bg-green-500 rounded-xl hover:text-white px-5 py-2"
-                        >
-                            Menu
-                        </a>
-                    </li>
-                    <li>
-                        <a
-                            href="/bantuan"
-                            className="font-medium hover:bg-green-500 rounded-xl hover:text-white px-5 py-2"
-                        >
-                            Bantuan
-                        </a>
-                    </li>
-                </ul>
-                <BurgerMenu toggleCart={toggleCart} />
-            </div>
-        </nav>
-
-        <main className="pt-[140px] px-6 md:px-12 pb-12 max-w-6xl mx-auto">
+        <main className="pt-[140px] sm:pt-[150px] px-4 md:px-8 lg:px-12 pb-12 max-w-6xl mx-auto">
             <h2 className="text-3xl font-bold text-[#2E4F4F] mb-8 text-center">Pusat Bantuan</h2>
 
             <div className="text-gray-700 text-lg mb-10 text-center">
@@ -97,7 +57,7 @@ const Bantuan = () => {
                 </p>
             </div>
         </main>
-    </div>
+    </Box>
   );
 };
 

@@ -1,38 +1,57 @@
+import { 
+    Box, 
+    Grid, 
+    Button, 
+    TextField, 
+    Typography, 
+    InputAdornment 
+} from '@mui/material';
+import { Phone } from '@mui/icons-material';
+
 const Ewallet = ({ selected, onSelect, number, onNumberChange }) => {
     const options = ["Dana", "ShopeePay", "GoPay", "OVO"];
+    const colors = {
+        "Dana": "bg-blue-50 text-blue-600 border-blue-200",
+        "ShopeePay": "bg-green-500 text-white border-green-400",
+        "GoPay": "bg-gray-50 text-gray-600 border-gray-200",
+        "OVO": "bg-gray-50 text-gray-600 border-gray-200",
+    };
   
     return (
-        <div className="mb-6">
-            <div className="grid grid-cols-2 gap-4 mb-4">
+        <div>
+            <div className="grid grid-cols-2 gap-3 mb-5">
                 {options.map((method) => (
                     <button
-                    key={method}
-                    onClick={() => onSelect(method)}
-                    className={`border rounded-xl py-3 text-center font-medium ${
-                        selected === method ? "bg-green-500 text-white" : "bg-gray-100 text-gray-700"
-                    } hover:bg-green-100 transition`}
+                        key={method}
+                        onClick={() => onSelect(method)}
+                        className={`
+                            px-4 py-3 rounded-lg border text-center transition-colors
+                            ${selected === method 
+                                ? colors[method] 
+                                : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'}
+                        `}
                     >
-                    {method}
+                        {method}
                     </button>
                 ))}
             </div>
     
             {selected && (
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Masukkan nomor {selected}
+                <div className="mb-3">
+                    <label className="block text-sm text-gray-600 mb-1.5">
+                        Masukkan nomor {selected}
                     </label>
                     <input
-                    type="text"
-                    placeholder="08xxxxxxxxxx"
-                    value={number}
-                    onChange={(e) => onNumberChange(e.target.value)}
-                    className="w-full rounded-xl bg-gray-100 px-4 py-3 focus:outline-none"
+                        type="text"
+                        placeholder="08xxxxxxxxxx"
+                        value={number}
+                        onChange={(e) => onNumberChange(e.target.value)}
+                        className="w-full rounded-lg bg-gray-50 px-4 py-3.5 focus:outline-none border border-gray-200 focus:border-green-300 focus:ring-1 focus:ring-green-300 transition-colors"
                     />
                 </div>
             )}
         </div>
     );
-  };
+};
   
-  export default Ewallet;
+export default Ewallet;

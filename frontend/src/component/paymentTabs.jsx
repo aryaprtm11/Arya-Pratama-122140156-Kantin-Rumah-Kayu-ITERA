@@ -2,21 +2,23 @@ import React from "react";
 
 const PaymentTabs = ({ paymentMethod, setPaymentMethod, resetEwallet }) => {
     return (
-        <div className="flex items-center justify-between mb-6 bg-gray-100 rounded-xl p-1">
+        <div className="mb-5 flex bg-gray-100 p-1 rounded-lg">
             <button
-                className={`flex-1 py-2 rounded-xl text-sm font-medium ${
+                className={`flex-1 py-2 text-center rounded-lg ${
                 paymentMethod === "ewallet"
-                    ? "bg-white text-black shadow"
+                    ? "bg-white shadow text-gray-800"
                     : "text-gray-500"
                 }`}
                 onClick={() => setPaymentMethod("ewallet")}
             >
-                👜 E-Wallet
+                <span className="flex items-center justify-center gap-1.5 text-sm">
+                    <span>🔒</span> E-Wallet
+                </span>
             </button>
             <button
-                className={`flex-1 py-2 rounded-xl text-sm font-medium ${
+                className={`flex-1 py-2 text-center rounded-lg ${
                 paymentMethod === "qris"
-                    ? "bg-green-500 text-white shadow"
+                    ? "bg-white shadow text-gray-800"
                     : "text-gray-500"
                 }`}
                 onClick={() => {
@@ -24,7 +26,9 @@ const PaymentTabs = ({ paymentMethod, setPaymentMethod, resetEwallet }) => {
                 resetEwallet();
                 }}
             >
-                📱 QRIS
+                <span className="flex items-center justify-center gap-1.5 text-sm">
+                    <span>📱</span> QRIS
+                </span>
             </button>
         </div>
     );

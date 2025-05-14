@@ -1,30 +1,43 @@
 import { useState, useEffect } from "react"
 import Card from "../component/card"
-import { FaShoppingCart } from "react-icons/fa"
+import { FaShoppingCart, FaUtensils } from "react-icons/fa"
 import { useCart } from "./cart"
-import IteraLogo from "../assets/itera.png"
-import BurgerMenu from "../component/BurgerMenu"
 import SearchInput from "../component/SearchInput"
 import CategoryFilter from "../component/CategoryFilter"
+import Navbar from "../component/Navbar"
+import { 
+  Container, 
+  Typography, 
+  Box, 
+  Grid, 
+  Paper, 
+  Divider, 
+  CircularProgress,
+  Chip
+} from '@mui/material'
 
 const OrderMenu = () => {
     const [menuItems, setMenuItems] = useState([])
     const [searchTerm, setSearchTerm] = useState("")
     const [categoryFilter, setCategoryFilter] = useState("Semua")
+    const [loading, setLoading] = useState(true)
     const { toggleCart } = useCart()
 
     useEffect(() => {
         const fetchMenu = async () => {
-        try {
-            const response = await fetch("https://67f024472a80b06b88970dab.mockapi.io/Popular")
-            const data = await response.json()
-            setMenuItems(data)
-        } catch (error) {
-            console.error("Error fetching menu:", error)
+            setLoading(true)
+            try {
+                const response = await fetch("https://67f024472a80b06b88970dab.mockapi.io/Popular")
+                const data = await response.json()
+                setMenuItems(data)
+                setLoading(false)
+            } catch (error) {
+                console.error("Error fetching menu:", error)
+                setLoading(false)
+            }
         }
-    }
 
-    fetchMenu()
+        fetchMenu()
     }, [])
 
     const filteredItems = menuItems.filter((item) => {
@@ -36,94 +49,68 @@ const OrderMenu = () => {
     const categories = ["Semua", ...new Set(menuItems.map((item) => item.category))]
 
     return (
-        <div className="bg-[#FDFAF6] min-h-screen font-poppins">
-            <nav className="fixed top-0 left-0 w-full z-50 bg-[#E4EFE7] p-6 py-6 shadow-lg rounded-b-xl">
-                <div className="flex justify-between items-center w-full px-6">
-                    <div className="flex items-center gap-4">
-                        <img src={IteraLogo} alt="Logo Itera" className="h-10 w-auto" />
-                        <h1
-                        className="navbar-title font-semibold text-xl sm:text-2xl md:text-3xl ml-2"
-                        style={{ fontFamily: "Times New Roman, Times, serif" }}
-                        >
-                        Kantin Rumah Kayu ITERA
-                        </h1>
-                    </div>
+        <Box className="bg-[#FDFAF6] min-h-screen font-poppins">
+            <Navbar toggleCart={toggleCart} activePage="order" />
 
-                    <ul className="hidden md:flex items-center gap-6 text-sm sm:text-base md:text-lg">
-                        <li>
-                            <a
-                                href="/"
-                                className="font-medium hover:bg-green-500 rounded-xl hover:text-white px-5 py-2"
-                            >
-                                Beranda
-                            </a>
-                        </li>
-                        <li>
-                            <a
-                                href="/order"
-                                className="font-medium hover:bg-green-500 rounded-xl hover:text-white px-5 py-2"
-                            >
-                                Menu
-                            </a>
-                        </li>
-                        <li>
-                            <a
-                                href="/bantuan"
-                                className="font-medium hover:bg-green-500 rounded-xl hover:text-white px-5 py-2"
-                            >
-                                Bantuan
-                            </a>
-                        </li>
-                    </ul>
-                    <BurgerMenu toggleCart={toggleCart} />
-                </div>
-            </nav>
-
-            <section className="pt-30 px-6 md:px-12 py-8">
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
-                    <div className="order-1 md:order-none w-full md:w-auto">
-                        <div className="flex flex-col md:flex-row items-center gap-4 w-full">
-                            <button
-                            onClick={toggleCart}
-                            className="flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition self-start md:self-auto"
-                            >
-                            <FaShoppingCart />
-                            Keranjang
-                            </button>
+            <Container maxWidth="xl" sx={{ pt: { xs: '140px', sm: '150px', md: '150px' }, pb: 8, px: { xs: 2, sm: 3, md: 4, lg: 6 } }}>
+                <Box sx={{ mb: { xs: 3, sm: 4, md: 5 } }}>
+                    <Paper elevation={2} sx={{ p: { xs: 2, sm: 3 }, borderRadius: 2, backgroundColor: '#fff' }}>
+                        <div className="flex flex-col md:flex-row justify-between items-center gap-3 md:gap-4">
+                            <div className="w-full md:w-auto order-2 md:order-1">
+                                <button
+                                    onClick={toggleCart}
+                                    className="flex items-center justify-center gap-1.5 bg-green-500 text-white px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg hover:bg-green-600 w-full md:w-auto text-xs sm:text-sm font-medium transition-all"
+                                >
+                                    <FaShoppingCart className="text-sm sm:text-lg" />
+                                    Keranjang
+                                </button>
+                            </div>
                             
-                            <div className="w-full md:w-[400px] lg:w-[500px] xl:w-[600px]">
-                            <SearchInput value={searchTerm} onChange={setSearchTerm} />
+                            <div className="w-full order-1 md:order-2 md:max-w-xl">
+                                <SearchInput value={searchTerm} onChange={setSearchTerm} />
+                            </div>
+                            
+                            <div className="w-full md:w-auto order-3 mt-3 md:mt-0">
+                                <Box sx={{ textAlign: { xs: 'center', md: 'left' } }}>
+                                    <CategoryFilter
+                                        categories={categories}
+                                        selected={categoryFilter}
+                                        onSelect={setCategoryFilter}
+                                    />
+                                </Box>
                             </div>
                         </div>
-                    </div>
+                    </Paper>
+                </Box>
 
-                    <div className="order-3 md:order-none">
-                        <CategoryFilter
-                            categories={categories}
-                            selected={categoryFilter}
-                            onSelect={setCategoryFilter}
-                        />
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5 justify-center">
-                    {filteredItems.length === 0 ? (
-                        <p className="text-center text-gray-500 col-span-full">Menu tidak ditemukan.</p>
+                {loading ? (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', my: 8 }}>
+                        <CircularProgress color="success" />
+                    </Box>
+                ) : (
+                    filteredItems.length === 0 ? (
+                        <div className="bg-white rounded-lg p-6 sm:p-8 text-center shadow-md">
+                            <FaUtensils className="mx-auto text-gray-400 text-3xl sm:text-4xl mb-3 sm:mb-4" />
+                            <p className="text-lg sm:text-xl font-medium text-gray-600 mb-2">Menu tidak ditemukan</p>
+                            <p className="text-sm sm:text-base text-gray-500">Coba ubah kata kunci pencarian atau pilih kategori lain</p>
+                        </div>
                     ) : (
-                        filteredItems.map((item) => (
-                        <Card
-                            key={item.id}
-                            id={item.id}
-                            name={item.name}
-                            image={item.image}
-                            desc={item.desc}
-                            price={item.price}
-                        />
-                        ))
-                    )}
-                </div>
-            </section>
-        </div>
+                        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-4 sm:gap-6 md:gap-8 xl:gap-10 justify-center mx-auto" style={{ maxWidth: "1800px" }}>
+                            {filteredItems.map((item) => (
+                                <Card
+                                    key={item.id}
+                                    id={item.id}
+                                    name={item.name}
+                                    image={item.image}
+                                    desc={item.desc}
+                                    price={item.price}
+                                />
+                            ))}
+                        </div>
+                    )
+                )}
+            </Container>
+        </Box>
     )
 }
 
