@@ -1,4 +1,4 @@
-import { useCart } from "../pages/cart";
+import { useCart } from "../../pages/cart";
 import Swal from "sweetalert2";
 import { FaPlus } from "react-icons/fa";
 
@@ -46,4 +46,4 @@ function Card({ id, name, image, desc, price }) {
   );
 }
 
-export default Card;
+export default Card; 

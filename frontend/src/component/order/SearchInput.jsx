@@ -15,4 +15,4 @@ const SearchInput = ({ value, onChange }) => (
     </div>
 );
   
-export default SearchInput;  
+export default SearchInput; 

@@ -9,7 +9,7 @@ import {
   Chip 
 } from '@mui/material';
 import { Restaurant, ShoppingCart } from '@mui/icons-material';
-import Kantin from "../assets/Kantin.jpg";
+import Kantin from "../../assets/Kantin.jpg";
 
 const HeroSection = ({ onOrderClick }) => {
   return (

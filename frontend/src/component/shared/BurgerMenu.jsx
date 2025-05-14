@@ -136,4 +136,4 @@ const BurgerMenu = ({ toggleCart }) => {
     )
 }
 
-export default BurgerMenu
+export default BurgerMenu 

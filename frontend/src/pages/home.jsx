@@ -14,9 +14,9 @@ import {
 } from '@mui/icons-material';
 
 // Impor komponen yang telah dibuat
-import Navbar from "../component/Navbar";
-import HeroSection from "../component/HeroSection";
-import FeatureCard from "../component/FeatureCard";
+import Navbar from "../component/shared/Navbar";
+import HeroSection from "../component/home/HeroSection";
+import FeatureCard from "../component/home/FeatureCard";
 
 const Home = () => {
     const { toggleCart } = useCart();

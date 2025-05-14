@@ -1,5 +1,5 @@
 import React from "react";
-import QrisImage from "../assets/qris.jpg";
+import QrisImage from "../../assets/qris.jpg";
 import { Box, Typography, Divider, Paper } from '@mui/material';
 import { QrCode2 } from '@mui/icons-material';
 
@@ -57,4 +57,4 @@ const Qris = () => {
     );
 };
 
-export default Qris;
+export default Qris; 

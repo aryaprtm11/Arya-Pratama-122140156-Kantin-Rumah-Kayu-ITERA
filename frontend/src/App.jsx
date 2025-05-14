@@ -5,7 +5,7 @@ import OrderMenu from './pages/order';
 import Checkout from './pages/checkout';
 import Bantuan from './pages/bantuan';
 import { CartProvider } from './pages/cart';
-import CartPopup from './component/CartPopup';
+import CartPopup from './component/shared/CartPopup';
 
 const App = () => {
   return (

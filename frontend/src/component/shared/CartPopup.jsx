@@ -1,4 +1,4 @@
-import { useCart } from "../pages/cart";
+import { useCart } from "../../pages/cart";
 import { useNavigate } from "react-router-dom";
 
 const CartPopup = () => {
@@ -76,4 +76,4 @@ const CartPopup = () => {
     );
 };
 
-export default CartPopup;
+export default CartPopup; 

@@ -34,4 +34,4 @@ const PaymentTabs = ({ paymentMethod, setPaymentMethod, resetEwallet }) => {
     );
 };
 
-export default PaymentTabs;
+export default PaymentTabs; 

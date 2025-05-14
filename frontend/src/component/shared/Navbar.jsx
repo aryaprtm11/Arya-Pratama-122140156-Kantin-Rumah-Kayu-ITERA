@@ -1,6 +1,6 @@
 import React from 'react';
 import { Paper } from '@mui/material';
-import IteraLogo from "../assets/itera.png";
+import IteraLogo from "../../assets/itera.png";
 import BurgerMenu from "./BurgerMenu";
 
 const Navbar = ({ toggleCart, activePage = '' }) => {

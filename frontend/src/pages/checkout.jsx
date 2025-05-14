@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "./cart";
-import PaymentTabs from "../component/paymentTabs";
-import Ewallet from "../component/eWallet";
-import Qris from "../component/qris";
+import PaymentTabs from "../component/checkout/paymentTabs";
+import Ewallet from "../component/checkout/eWallet";
+import Qris from "../component/checkout/qris";
 import Swal from "sweetalert2";
 
 const Checkout = () => {

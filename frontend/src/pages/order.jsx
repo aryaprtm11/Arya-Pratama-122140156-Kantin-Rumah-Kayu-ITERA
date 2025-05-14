@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react"
-import Card from "../component/card"
+import Card from "../component/order/card"
 import { FaShoppingCart, FaUtensils } from "react-icons/fa"
 import { useCart } from "./cart"
-import SearchInput from "../component/SearchInput"
-import CategoryFilter from "../component/CategoryFilter"
-import Navbar from "../component/Navbar"
+import SearchInput from "../component/order/SearchInput"
+import CategoryFilter from "../component/order/CategoryFilter"
+import Navbar from "../component/shared/Navbar"
 import { 
   Container, 
   Typography, 

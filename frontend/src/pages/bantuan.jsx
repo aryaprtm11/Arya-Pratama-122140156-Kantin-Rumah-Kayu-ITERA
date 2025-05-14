@@ -1,5 +1,5 @@
 import { useCart } from "./cart";
-import Navbar from "../component/Navbar";
+import Navbar from "../component/shared/Navbar";
 import { Box } from '@mui/material';
 
 const Bantuan = () => {
