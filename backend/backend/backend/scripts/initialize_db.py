@@ -12,36 +12,73 @@ def setup_models(dbsession):
     """
     Add initial model objects.
     """
+    # Tambahkan role admin
+    role_admin = models.Roles(
+        role_name='admin',
+        permissions='all'
+    )
+    dbsession.add(role_admin)
+    dbsession.flush()  # Untuk mendapatkan role_id
+    
+    # Tambahkan user admin
+    admin_user = models.Users(
+        role_id=role_admin.role_id,
+        nama_lengkap='Administrator',
+        email='admin@rumahmakan.com',
+        password='admin123',
+        is_active=True
+    )
+    dbsession.add(admin_user)
+
+    # Tambahkan kategori menu
+    kategori_makanan = models.Kategori(
+        nama_kategori='Makanan',
+        icon='🍽️'
+    )
+    kategori_minuman = models.Kategori(
+        nama_kategori='Minuman',
+        icon='🥤'
+    )
+    
+    dbsession.add(kategori_makanan)
+    dbsession.add(kategori_minuman)
+    dbsession.flush()  # Untuk mendapatkan kategori_id
+    
     # Tambahkan data awal untuk Menu Makanan
     menu1 = models.Menu(
-        menu='Nasi Gudeg',
-        kategori='Makanan',
+        nama_menu='Nasi Gudeg',
+        kategori_id=kategori_makanan.kategori_id,
+        deskripsi='Nasi gudeg khas Jogja',
         harga=25000,
-        stok=50
+        status='aktif'
     )
     menu2 = models.Menu(
-        menu='Ayam Bakar',
-        kategori='Makanan',
+        nama_menu='Ayam Bakar',
+        kategori_id=kategori_makanan.kategori_id,
+        deskripsi='Ayam bakar bumbu special',
         harga=30000,
-        stok=35
+        status='aktif'
     )
     menu3 = models.Menu(
-        menu='Es Teh Manis',
-        kategori='Minuman',
+        nama_menu='Es Teh Manis',
+        kategori_id=kategori_minuman.kategori_id,
+        deskripsi='Es teh manis segar',
         harga=8000,
-        stok=100
+        status='aktif'
     )
     menu4 = models.Menu(
-        menu='Soto Ayam',
-        kategori='Makanan',
+        nama_menu='Soto Ayam',
+        kategori_id=kategori_makanan.kategori_id,
+        deskripsi='Soto ayam kampung',
         harga=20000,
-        stok=40
+        status='aktif'
     )
     menu5 = models.Menu(
-        menu='Jus Jeruk',
-        kategori='Minuman',
+        nama_menu='Jus Jeruk',
+        kategori_id=kategori_minuman.kategori_id,
+        deskripsi='Jus jeruk segar',
         harga=12000,
-        stok=60
+        status='aktif'
     )
     
     dbsession.add(menu1)

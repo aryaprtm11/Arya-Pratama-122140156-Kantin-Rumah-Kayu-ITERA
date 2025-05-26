@@ -8,6 +8,7 @@ import { CartProvider } from './pages/cart';
 import CartPopup from './component/shared/CartPopup';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import DashboardAdmin from './pages/admin/DashboardAdmin';
 
 const App = () => {
   return (
@@ -20,6 +21,7 @@ const App = () => {
           <Route path="/order" element={<OrderMenu />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/bantuan" element={<Bantuan />} />
+          <Route path="/admin/dashboard" element={<DashboardAdmin />} />
         </Routes>
         <CartPopup />
       </Router>

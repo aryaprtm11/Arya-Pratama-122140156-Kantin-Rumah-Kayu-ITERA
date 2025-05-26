@@ -5,7 +5,7 @@ from pyramid.httpexceptions import (
     HTTPNotFound,
     HTTPBadRequest,
 )
-from ..models import Menu, Kategori, Users, Orders, OrderDetails, Keranjang
+from ..models import Menu, Kategori, Users, Orders, OrderDetails, Keranjang, Roles
 
 
 # ===== MENU VIEWS =====

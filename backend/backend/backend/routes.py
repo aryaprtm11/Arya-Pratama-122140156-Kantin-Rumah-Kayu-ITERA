@@ -5,6 +5,11 @@ def includeme(config):
     # Default route
     config.add_route('home', '/')
     
+    # API Routes
+    # Auth routes
+    config.add_route('login', '/api/login', request_method='POST')
+    config.add_route('user_register', '/api/register')
+    
     # Menu routes
     config.add_route('menu_list', '/api/menu', request_method='GET')
     config.add_route('menu_detail', '/api/menu/{id}', request_method='GET')
@@ -22,8 +27,6 @@ def includeme(config):
     # User routes
     config.add_route('user_list', '/api/users', request_method='GET')
     config.add_route('user_detail', '/api/users/{id}', request_method='GET')
-    config.add_route('user_register', '/api/users/register', request_method='POST')
-    config.add_route('user_login', '/api/users/login', request_method='POST')
     config.add_route('user_update', '/api/users/{id}', request_method='PUT')
     config.add_route('user_delete', '/api/users/{id}', request_method='DELETE')
     

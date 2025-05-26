@@ -11,15 +11,43 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:5000/api/login', {
+      console.log('Attempting login with:', { email, password });
+      
+      const response = await axios.post('http://localhost:6543/api/login', {
         email,
         password,
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
       });
       
+      console.log('Login response:', response.data);
+      
+      // Simpan token dan data user
       localStorage.setItem('token', response.data.token);
-      navigate('/dashboard');
+      localStorage.setItem('userRole', response.data.user.role_name);
+      localStorage.setItem('userData', JSON.stringify(response.data.user));
+
+      // Cek role dan arahkan ke halaman yang sesuai
+      if (response.data.user.role_name === 'admin') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/');
+      }
     } catch (err) {
-      setError(err.response?.data?.message || 'Terjadi kesalahan saat login');
+      console.error('Login error:', err);
+      if (err.response) {
+        console.error('Error response:', err.response);
+        setError(err.response.data?.error || 'Terjadi kesalahan saat login');
+      } else if (err.request) {
+        console.error('Error request:', err.request);
+        setError('Tidak dapat terhubung ke server');
+      } else {
+        console.error('Error:', err.message);
+        setError('Terjadi kesalahan saat login');
+      }
     }
   };
 
