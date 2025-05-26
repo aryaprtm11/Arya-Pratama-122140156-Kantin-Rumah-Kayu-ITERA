@@ -1,9 +1,12 @@
 import React from 'react';
 import { Paper } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import IteraLogo from "../../assets/itera.png";
 import BurgerMenu from "./BurgerMenu";
 
 const Navbar = ({ toggleCart, activePage = '' }) => {
+  const navigate = useNavigate();
+
   return (
     <Paper elevation={3} className="fixed top-0 left-0 w-full z-50 bg-[#E4EFE7] p-6 py-6 shadow-lg rounded-b-xl">
       <div className="flex justify-between items-center w-full px-6">
@@ -54,6 +57,14 @@ const Navbar = ({ toggleCart, activePage = '' }) => {
               >
                 Bantuan
               </a>
+            </li>
+            <li>
+              <button
+                onClick={() => navigate('/login')}
+                className="font-medium bg-indigo-600 text-white hover:bg-indigo-700 rounded-xl px-5 py-2 transition-colors duration-200"
+              >
+                Masuk
+              </button>
             </li>
           </ul>
           

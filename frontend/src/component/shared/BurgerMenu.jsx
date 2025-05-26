@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { FaBars, FaTimes, FaShoppingCart, FaHome, FaUtensils, FaQuestionCircle } from "react-icons/fa"
+import { FaBars, FaTimes, FaShoppingCart, FaHome, FaUtensils, FaQuestionCircle, FaSignInAlt } from "react-icons/fa"
 import { useNavigate } from "react-router-dom"
 import { Drawer, List, ListItem, ListItemIcon, ListItemText, IconButton, Box, Typography, Divider } from '@mui/material'
 
@@ -28,6 +28,7 @@ const BurgerMenu = ({ toggleCart }) => {
         { text: 'Beranda', icon: <FaHome size={20} />, path: '/' },
         { text: 'Menu', icon: <FaUtensils size={20} />, path: '/order' },
         { text: 'Bantuan', icon: <FaQuestionCircle size={20} />, path: '/bantuan' },
+        { text: 'Masuk', icon: <FaSignInAlt size={20} />, path: '/login' },
     ]
 
     return (
@@ -92,7 +93,7 @@ const BurgerMenu = ({ toggleCart }) => {
                                     mx: 0,
                                     mb: 2,
                                     '&:hover': { 
-                                        backgroundColor: '#99BC85',
+                                        backgroundColor: item.text === 'Masuk' ? '#4F46E5' : '#99BC85',
                                         color: 'white',
                                         '& .MuiListItemIcon-root': {
                                             color: 'white'
@@ -101,7 +102,7 @@ const BurgerMenu = ({ toggleCart }) => {
                                 }}
                             >
                                 <ListItemIcon sx={{ 
-                                    color: '#2E4F4F',
+                                    color: item.text === 'Masuk' ? '#4F46E5' : '#2E4F4F',
                                     minWidth: '40px',
                                     ml: 2
                                 }}>
@@ -111,7 +112,8 @@ const BurgerMenu = ({ toggleCart }) => {
                                     primary={item.text} 
                                     primaryTypographyProps={{ 
                                         fontWeight: 'medium',
-                                        fontSize: '1.1rem'
+                                        fontSize: '1.1rem',
+                                        color: item.text === 'Masuk' ? '#4F46E5' : 'inherit'
                                     }} 
                                 />
                             </ListItem>

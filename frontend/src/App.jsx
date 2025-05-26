@@ -6,12 +6,16 @@ import Checkout from './pages/checkout';
 import Bantuan from './pages/bantuan';
 import { CartProvider } from './pages/cart';
 import CartPopup from './component/shared/CartPopup';
+import Login from './pages/Login';
+import Register from './pages/Register';
 
 const App = () => {
   return (
     <CartProvider>
       <Router>
         <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
           <Route path="/" element={<Home />} />
           <Route path="/order" element={<OrderMenu />} />
           <Route path="/checkout" element={<Checkout />} />
