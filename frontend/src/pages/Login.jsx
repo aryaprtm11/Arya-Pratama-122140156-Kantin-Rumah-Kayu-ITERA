@@ -34,7 +34,7 @@ const Login = () => {
       if (response.data.user.role_name === 'admin') {
         navigate('/admin/dashboard');
       } else {
-        navigate('/');
+        navigate('/order'); // Arahkan ke halaman menu untuk pembeli
       }
     } catch (err) {
       console.error('Login error:', err);

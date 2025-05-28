@@ -8,7 +8,7 @@ def includeme(config):
     # API Routes
     # Auth routes
     config.add_route('login', '/api/login', request_method='POST')
-    config.add_route('user_register', '/api/register')
+    config.add_route('user_register', '/api/register', request_method='POST')
     
     # Menu routes
     config.add_route('menu_list', '/api/menu', request_method='GET')

@@ -15,31 +15,31 @@ const AdminSidebar = ({ activeMenu = 'dashboard' }) => {
       id: 'dashboard',
       label: 'Dashboard',
       icon: 'material-symbols:dashboard',
-      href: '#'
+      href: '/admin/dashboard'
     },
     {
       id: 'pesanan',
       label: 'Pesanan',
       icon: 'clarity:list-line',
-      href: '#'
+      href: '/admin/pesanan'
     },
     {
       id: 'menu',
       label: 'Menu',
       icon: 'mdi:silverware-fork-knife',
-      href: '#'
+      href: '/admin/menu'
     },
     {
       id: 'pengguna',
       label: 'Pengguna',
       icon: 'ph:user-bold',
-      href: '#'
+      href: '/admin/pengguna'
     },
     {
       id: 'bantuan',
       label: 'Bantuan',
       icon: 'ri:question-fill',
-      href: '#'
+      href: '/admin/bantuan'
     }
   ];
 
@@ -54,8 +54,8 @@ const AdminSidebar = ({ activeMenu = 'dashboard' }) => {
           {menuItems.map((item) => (
             <li key={item.id}>
               <a 
-                href={item.href} 
-                className={`flex items-center px-6 py-4 rounded-lg transition-colors duration-200 text-lg ${
+                onClick={() => navigate(item.href)}
+                className={`flex items-center px-6 py-4 rounded-lg transition-colors duration-200 text-lg cursor-pointer ${
                   activeMenu === item.id 
                     ? 'bg-white text-[#2D336B]' 
                     : 'hover:bg-white hover:text-[#2D336B]'

@@ -118,6 +118,14 @@ def user_list(request):
 def user_register(request):
     """View untuk registrasi user baru"""
     try:
+        # Add CORS headers
+        request.response.headers.update({
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'POST',
+            'Access-Control-Allow-Headers': 'Content-Type,Accept'
+        })
+
+        print("Received registration data:", request.json_body)  # Debug print
         json_data = request.json_body
         
         required_fields = ['nama_lengkap', 'email', 'password']
@@ -125,26 +133,41 @@ def user_register(request):
             if field not in json_data:
                 return HTTPBadRequest(json_body={'error': f'Field {field} wajib diisi'})
         
+        # Validasi email format
+        if not '@' in json_data['email']:
+            return HTTPBadRequest(json_body={'error': 'Format email tidak valid'})
+            
         # Check email exists
         dbsession = request.dbsession
         existing_user = dbsession.query(Users).filter_by(email=json_data['email']).first()
         if existing_user:
             return HTTPBadRequest(json_body={'error': 'Email sudah terdaftar'})
         
+        # Validasi password
+        if len(json_data['password']) < 6:
+            return HTTPBadRequest(json_body={'error': 'Password minimal 6 karakter'})
+        
         user = Users(
             nama_lengkap=json_data['nama_lengkap'],
             email=json_data['email'],
             password=json_data['password'],  # Should be hashed in production
-            role_id=json_data.get('role_id', 2),  # Default role customer
+            role_id=2,  # Set role_id 2 for pembeli (role sudah ada di database)
             is_active=True
         )
         
         dbsession.add(user)
         dbsession.flush()
         
-        return {'success': True, 'user': user.to_dict()}
+        return {
+            'success': True,
+            'message': 'Registrasi berhasil',
+            'user': user.to_dict()
+        }
             
     except Exception as e:
+        print("Registration error:", str(e))  # Debug print
+        import traceback
+        traceback.print_exc()
         return HTTPBadRequest(json_body={'error': str(e)})
 
 

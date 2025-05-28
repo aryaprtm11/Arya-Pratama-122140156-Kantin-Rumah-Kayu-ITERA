@@ -12,16 +12,42 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:5000/api/register', {
-        name,
+      const response = await axios.post('http://localhost:6543/api/register', {
+        nama_lengkap: name,
         email,
         password,
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
       });
       
-      localStorage.setItem('token', response.data.token);
-      navigate('/dashboard');
+      console.log('Register response:', response.data);
+      
+      if (response.data.success) {
+        // Simpan token jika ada
+        if (response.data.token) {
+          localStorage.setItem('token', response.data.token);
+        }
+        // Simpan data user jika ada
+        if (response.data.user) {
+          localStorage.setItem('userData', JSON.stringify(response.data.user));
+        }
+        navigate('/login');
+      }
     } catch (err) {
-      setError(err.response?.data?.message || 'Terjadi kesalahan saat registrasi');
+      console.error('Register error:', err);
+      if (err.response) {
+        console.error('Error response:', err.response);
+        setError(err.response.data?.error || 'Terjadi kesalahan saat registrasi');
+      } else if (err.request) {
+        console.error('Error request:', err.request);
+        setError('Tidak dapat terhubung ke server');
+      } else {
+        console.error('Error:', err.message);
+        setError('Terjadi kesalahan saat registrasi');
+      }
     }
   };
 
