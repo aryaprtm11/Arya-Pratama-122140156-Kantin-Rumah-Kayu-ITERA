@@ -15,7 +15,7 @@ def includeme(config):
     config.add_route('menu_detail', '/api/menu/{id}', request_method='GET')
     config.add_route('menu_add', '/api/menu', request_method='POST')
     config.add_route('menu_update', '/api/menu/{id}', request_method='PUT')
-    config.add_route('menu_delete', '/api/menu/{id}', request_method='DELETE')
+    config.add_route('menu_delete', '/api/menu/{id}', request_method=['DELETE', 'OPTIONS'])
     
     # Kategori routes
     config.add_route('kategori_list', '/api/kategori', request_method='GET')

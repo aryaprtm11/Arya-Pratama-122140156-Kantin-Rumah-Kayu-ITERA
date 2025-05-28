@@ -44,5 +44,9 @@ def main(global_config, **settings):
         config.include('pyramid_jwt')
         config.include('pyramid_debugtoolbar')
         config.add_static_view('static', 'static', cache_max_age=3600)
+        
+        # Add CORS configuration
+        config.add_tween('backend.cors.cors_tween_factory')
+        
         config.scan()
         return config.make_wsgi_app()

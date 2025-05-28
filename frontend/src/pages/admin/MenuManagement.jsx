@@ -28,7 +28,7 @@ const MenuManagement = () => {
 
   const fetchMenus = async () => {
     try {
-      const response = await fetch('/api/menu_list');
+      const response = await fetch('/api/menu');
       const data = await response.json();
       setMenus(data.menus || []);
     } catch (err) {
@@ -40,11 +40,27 @@ const MenuManagement = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await fetch('/api/kategori_list');
+      console.log('Fetching categories...');
+      const response = await fetch('/api/kategori');
+      console.log('Response status:', response.status);
+      console.log('Response headers:', response.headers);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const data = await response.json();
-      setCategories(data.kategoris || []);
+      console.log('Categories data:', data);
+      
+      if (!data.kategoris) {
+        throw new Error('Data kategori tidak ditemukan dalam response');
+      }
+      
+      setCategories(data.kategoris);
+      console.log('Categories set successfully:', data.kategoris);
     } catch (err) {
-      setError('Gagal memuat data kategori');
+      console.error('Error fetching categories:', err);
+      setError('Gagal memuat data kategori: ' + err.message);
     }
   };
 
@@ -61,8 +77,7 @@ const MenuManagement = () => {
   const handleDeleteClick = async (menuId) => {
     if (!window.confirm('Apakah Anda yakin ingin menghapus menu ini?')) return;
     try {
-      // Assuming backend has a delete endpoint, else simulate
-      const response = await fetch(`/api/menu_delete/${menuId}`, { method: 'DELETE' });
+      const response = await fetch(`/api/menu/${menuId}`, { method: 'DELETE' });
       if (response.ok) {
         fetchMenus();
       } else {
@@ -81,21 +96,37 @@ const MenuManagement = () => {
   const handleFormSubmit = async (formData) => {
     try {
       const method = editingMenu ? 'PUT' : 'POST';
-      const url = editingMenu ? `/api/menu_update/${editingMenu.menu_id}` : '/api/menu_add';
+      const url = editingMenu ? `/api/menu/${editingMenu.menu_id}` : '/api/menu';
+      
+      console.log('Sending request:', {
+        method,
+        url,
+        formData
+      });
+      
       const response = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
         body: JSON.stringify(formData),
       });
+      
+      const responseData = await response.json();
+      console.log('Response:', responseData);
+      
       if (response.ok) {
         fetchMenus();
         handleModalClose();
       } else {
-        const errorData = await response.json();
-        alert(errorData.error || 'Gagal menyimpan menu');
+        const message = responseData.error || 'Gagal menyimpan menu';
+        console.error('Error saving menu:', message);
+        alert(message);
       }
     } catch (err) {
-      alert('Gagal menyimpan menu');
+      console.error('Error saving menu:', err);
+      alert('Gagal menyimpan menu: ' + err.message);
     }
   };
 

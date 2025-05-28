@@ -10,7 +10,14 @@ const MenuTable = ({ menus = [], loading = false, onEdit, onDelete }) => {
   };
 
   const getStatusColor = (status) => {
-    return status === 'aktif' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+    if (status === 'aktif' || status === 'tersedia') return 'bg-green-100 text-green-800';
+    return 'bg-red-100 text-red-800';
+  };
+
+  const getStatusDisplay = (status) => {
+    if (status === 'aktif') return 'Tersedia';
+    if (status === 'nonaktif') return 'Habis';
+    return status.charAt(0).toUpperCase() + status.slice(1);
   };
 
   if (loading) {
@@ -72,7 +79,7 @@ const MenuTable = ({ menus = [], loading = false, onEdit, onDelete }) => {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(menu.status)}`}>
-                    {menu.status}
+                    {getStatusDisplay(menu.status)}
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">

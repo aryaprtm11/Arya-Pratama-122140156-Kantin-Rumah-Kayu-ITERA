@@ -72,13 +72,134 @@ def menu_add(request):
         return HTTPBadRequest(json_body={'error': str(e)})
 
 
+@view_config(route_name='menu_delete', request_method='DELETE', renderer='json')
+def menu_delete(request):
+    """View untuk menghapus menu"""
+    # Add CORS headers
+    request.response.headers.update({
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'DELETE',
+        'Access-Control-Allow-Headers': 'Content-Type,Accept'
+    })
+    
+    try:
+        menu_id = request.matchdict['id']
+        dbsession = request.dbsession
+        menu = dbsession.query(Menu).filter_by(menu_id=menu_id).first()
+        
+        if menu is None:
+            return HTTPNotFound(json_body={'error': 'Menu tidak ditemukan'})
+        
+        dbsession.delete(menu)
+        dbsession.flush()  # Pastikan perubahan tersimpan ke database
+        
+        return {'success': True, 'message': 'Menu berhasil dihapus'}
+            
+    except Exception as e:
+        print("Error deleting menu:", str(e))  # Tambahkan logging
+        return HTTPBadRequest(json_body={'error': str(e)})
+
+
+@view_config(route_name='menu_delete', request_method='OPTIONS', renderer='json')
+def menu_delete_options(request):
+    """Handle OPTIONS request for CORS preflight"""
+    response = request.response
+    response.headers.update({
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'DELETE',
+        'Access-Control-Allow-Headers': 'Content-Type,Accept',
+        'Access-Control-Max-Age': '3600'
+    })
+    return {}
+
+
+@view_config(route_name='menu_update', request_method='PUT', renderer='json')
+def menu_update(request):
+    """View untuk mengupdate menu"""
+    # Add CORS headers
+    request.response.headers.update({
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'PUT',
+        'Access-Control-Allow-Headers': 'Content-Type,Accept'
+    })
+    
+    try:
+        menu_id = request.matchdict['id']
+        json_data = request.json_body
+        
+        dbsession = request.dbsession
+        menu = dbsession.query(Menu).filter_by(menu_id=menu_id).first()
+        
+        if menu is None:
+            return HTTPNotFound(json_body={'error': 'Menu tidak ditemukan'})
+        
+        # Validasi required fields
+        required_fields = ['nama_menu', 'kategori_id', 'harga']
+        for field in required_fields:
+            if field not in json_data:
+                return HTTPBadRequest(json_body={'error': f'Field {field} wajib diisi'})
+        
+        # Validasi kategori exists
+        kategori = dbsession.query(Kategori).filter_by(kategori_id=json_data['kategori_id']).first()
+        if not kategori:
+            return HTTPBadRequest(json_body={'error': 'Kategori tidak ditemukan'})
+        
+        # Validasi harga
+        try:
+            harga = float(json_data['harga'])
+            if harga < 0:
+                return HTTPBadRequest(json_body={'error': 'Harga tidak boleh negatif'})
+        except (ValueError, TypeError):
+            return HTTPBadRequest(json_body={'error': 'Harga harus berupa angka'})
+        
+        # Update menu
+        menu.nama_menu = json_data['nama_menu']
+        menu.kategori_id = json_data['kategori_id']
+        menu.deskripsi = json_data.get('deskripsi')
+        menu.harga = harga
+        menu.image = json_data.get('image')
+        menu.status = json_data.get('status', menu.status)
+        
+        dbsession.flush()
+        
+        return {'success': True, 'menu': menu.to_dict()}
+            
+    except Exception as e:
+        print("Error updating menu:", str(e))  # Tambahkan logging
+        return HTTPBadRequest(json_body={'error': str(e)})
+
+
+@view_config(route_name='menu_update', request_method='OPTIONS', renderer='json')
+def menu_update_options(request):
+    """Handle OPTIONS request for CORS preflight"""
+    response = request.response
+    response.headers.update({
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'PUT',
+        'Access-Control-Allow-Headers': 'Content-Type,Accept',
+        'Access-Control-Max-Age': '3600'
+    })
+    return {}
+
+
 # ===== KATEGORI VIEWS =====
 @view_config(route_name='kategori_list', renderer='json')
 def kategori_list(request):
     """View untuk menampilkan daftar kategori"""
-    dbsession = request.dbsession
-    kategoris = dbsession.query(Kategori).all()
-    return {'kategoris': [k.to_dict() for k in kategoris]}
+    # Add CORS headers
+    request.response.headers.update({
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET',
+        'Access-Control-Allow-Headers': 'Content-Type,Accept'
+    })
+    
+    try:
+        dbsession = request.dbsession
+        kategoris = dbsession.query(Kategori).all()
+        return {'kategoris': [k.to_dict() for k in kategoris]}
+    except Exception as e:
+        print("Error fetching categories:", str(e))
+        return HTTPBadRequest(json_body={'error': str(e)})
 
 
 @view_config(route_name='kategori_add', request_method='POST', renderer='json')

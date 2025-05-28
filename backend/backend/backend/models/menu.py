@@ -41,7 +41,7 @@ class Menu(Base):
     deskripsi = Column(Text)
     harga = Column(Integer, nullable=False)
     image = Column(String(255))
-    status = Column(String(20), default='aktif')
+    status = Column(String(20), default='tersedia')
     create_at = Column(DateTime, default=func.now())
     
     # Relationships

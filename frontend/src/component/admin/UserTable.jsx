@@ -2,7 +2,11 @@ import React from 'react';
 
 const UserTable = ({ users = [] }) => {
   const getStatusColor = (status) => {
-    return status === 'aktif' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+    return status === true ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+  };
+
+  const getRoleName = (role) => {
+    return role?.role_name || 'User';
   };
 
   return (
@@ -24,10 +28,10 @@ const UserTable = ({ users = [] }) => {
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.user_id}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.nama_lengkap}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.email}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.role}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{getRoleName(user.role)}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(user.status)}`}>
-                    {user.status === 'aktif' ? 'Aktif' : 'Nonaktif'}
+                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(user.is_active)}`}>
+                    {user.is_active ? 'Aktif' : 'Nonaktif'}
                   </span>
                 </td>
               </tr>

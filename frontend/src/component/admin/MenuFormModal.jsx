@@ -7,18 +7,18 @@ const MenuFormModal = ({ isOpen, onClose, onSubmit, categories, initialData }) =
     harga: '',
     deskripsi: '',
     image: '',
-    status: 'aktif',
+    status: 'tersedia',
   });
 
   useEffect(() => {
     if (initialData) {
       setFormData({
         nama_menu: initialData.nama_menu || '',
-        kategori_id: initialData.kategori ? initialData.kategori.kategori_id : '',
+        kategori_id: initialData.kategori_id || (initialData.kategori ? initialData.kategori.kategori_id : ''),
         harga: initialData.harga || '',
         deskripsi: initialData.deskripsi || '',
         image: initialData.image || '',
-        status: initialData.status || 'aktif',
+        status: initialData.status === 'aktif' ? 'tersedia' : (initialData.status === 'nonaktif' ? 'habis' : initialData.status),
       });
     } else {
       setFormData({
@@ -27,7 +27,7 @@ const MenuFormModal = ({ isOpen, onClose, onSubmit, categories, initialData }) =
         harga: '',
         deskripsi: '',
         image: '',
-        status: 'aktif',
+        status: 'tersedia',
       });
     }
   }, [initialData, categories]);
@@ -36,7 +36,16 @@ const MenuFormModal = ({ isOpen, onClose, onSubmit, categories, initialData }) =
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    let processedValue = value;
+    
+    // Konversi kategori_id dan harga ke number
+    if (name === 'kategori_id') {
+      processedValue = parseInt(value, 10);
+    } else if (name === 'harga') {
+      processedValue = parseFloat(value);
+    }
+    
+    setFormData(prev => ({ ...prev, [name]: processedValue }));
   };
 
   const handleSubmit = (e) => {
@@ -45,12 +54,21 @@ const MenuFormModal = ({ isOpen, onClose, onSubmit, categories, initialData }) =
       alert('Nama menu, kategori, dan harga wajib diisi');
       return;
     }
-    onSubmit(formData);
+    
+    // Pastikan data yang dikirim sudah dalam format yang benar
+    const submissionData = {
+      ...formData,
+      kategori_id: parseInt(formData.kategori_id, 10),
+      harga: parseFloat(formData.harga),
+    };
+    
+    console.log('Submitting form data:', submissionData);
+    onSubmit(submissionData);
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6">
+    <div className="fixed inset-0 backdrop-blur-sm bg-black/30 flex items-center justify-center z-50 p-4">
+      <div className="bg-white/90 backdrop-blur-sm rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6">
         <h2 className="text-xl font-semibold mb-4">{initialData ? 'Edit Menu' : 'Tambah Menu'}</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -60,7 +78,7 @@ const MenuFormModal = ({ isOpen, onClose, onSubmit, categories, initialData }) =
               name="nama_menu"
               value={formData.nama_menu}
               onChange={handleChange}
-              className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+              className="mt-1 block w-full border border-gray-300 rounded-md p-2 bg-white/80"
               required
             />
           </div>
@@ -70,7 +88,7 @@ const MenuFormModal = ({ isOpen, onClose, onSubmit, categories, initialData }) =
               name="kategori_id"
               value={formData.kategori_id}
               onChange={handleChange}
-              className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+              className="mt-1 block w-full border border-gray-300 rounded-md p-2 bg-white/80"
               required
             >
               {categories.map(cat => (
@@ -87,7 +105,7 @@ const MenuFormModal = ({ isOpen, onClose, onSubmit, categories, initialData }) =
               name="harga"
               value={formData.harga}
               onChange={handleChange}
-              className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+              className="mt-1 block w-full border border-gray-300 rounded-md p-2 bg-white/80"
               required
               min="0"
             />
@@ -98,7 +116,7 @@ const MenuFormModal = ({ isOpen, onClose, onSubmit, categories, initialData }) =
               name="deskripsi"
               value={formData.deskripsi}
               onChange={handleChange}
-              className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+              className="mt-1 block w-full border border-gray-300 rounded-md p-2 bg-white/80"
               rows="3"
             />
           </div>
@@ -109,7 +127,7 @@ const MenuFormModal = ({ isOpen, onClose, onSubmit, categories, initialData }) =
               name="image"
               value={formData.image}
               onChange={handleChange}
-              className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+              className="mt-1 block w-full border border-gray-300 rounded-md p-2 bg-white/80"
             />
           </div>
           <div>
@@ -118,17 +136,17 @@ const MenuFormModal = ({ isOpen, onClose, onSubmit, categories, initialData }) =
               name="status"
               value={formData.status}
               onChange={handleChange}
-              className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+              className="mt-1 block w-full border border-gray-300 rounded-md p-2 bg-white/80"
             >
-              <option value="aktif">Aktif</option>
-              <option value="nonaktif">Nonaktif</option>
+              <option value="tersedia">Tersedia</option>
+              <option value="habis">Habis</option>
             </select>
           </div>
           <div className="flex justify-end space-x-3">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100"
+              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 bg-white/80"
             >
               Batal
             </button>
