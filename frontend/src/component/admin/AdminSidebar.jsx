@@ -34,12 +34,6 @@ const AdminSidebar = ({ activeMenu = 'dashboard' }) => {
       label: 'Pengguna',
       icon: 'ph:user-bold',
       href: '/admin/pengguna'
-    },
-    {
-      id: 'bantuan',
-      label: 'Bantuan',
-      icon: 'ri:question-fill',
-      href: '/admin/bantuan'
     }
   ];
 

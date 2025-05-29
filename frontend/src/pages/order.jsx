@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react"
+import axios from "axios"
 import Card from "../component/order/card"
 import { FaShoppingCart, FaUtensils } from "react-icons/fa"
 import { useCart } from "./cart"
@@ -16,43 +17,75 @@ import {
   Chip
 } from '@mui/material'
 
+// Konfigurasi axios
+axios.defaults.baseURL = 'http://localhost:6543'
+
 const OrderMenu = () => {
     const [menuItems, setMenuItems] = useState([])
+    const [categories, setCategories] = useState(["Semua"])
     const [searchTerm, setSearchTerm] = useState("")
     const [categoryFilter, setCategoryFilter] = useState("Semua")
     const [loading, setLoading] = useState(true)
+    const [error, setError] = useState(null)
     const { toggleCart } = useCart()
 
     useEffect(() => {
-        const fetchMenu = async () => {
+        const fetchData = async () => {
             setLoading(true)
+            setError(null)
             try {
-                const response = await fetch("https://67f024472a80b06b88970dab.mockapi.io/Popular")
-                const data = await response.json()
-                setMenuItems(data)
-                setLoading(false)
+                // Fetch menu items
+                const menuResponse = await axios.get('/api/menu')
+                console.log('Menu data:', menuResponse.data)
+                
+                if (!menuResponse.data.menus) {
+                    throw new Error('Data menu tidak valid')
+                }
+                
+                // Menggunakan semua menu tanpa filter status
+                setMenuItems(menuResponse.data.menus)
+
+                // Fetch categories
+                const categoryResponse = await axios.get('/api/kategori')
+                console.log('Category data:', categoryResponse.data)
+                
+                if (!categoryResponse.data.kategoris) {
+                    throw new Error('Data kategori tidak valid')
+                }
+                
+                const categoryNames = ["Semua", ...categoryResponse.data.kategoris.map(cat => cat.nama_kategori)]
+                console.log('Category names:', categoryNames)
+                setCategories(categoryNames)
             } catch (error) {
-                console.error("Error fetching menu:", error)
+                console.error("Error fetching data:", error)
+                setError(error.response?.data?.message || error.message)
+            } finally {
                 setLoading(false)
             }
         }
 
-        fetchMenu()
+        fetchData()
     }, [])
 
     const filteredItems = menuItems.filter((item) => {
-        const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase())
-        const matchesCategory = categoryFilter === "Semua" || item.category === categoryFilter
+        const matchesSearch = item.nama_menu.toLowerCase().includes(searchTerm.toLowerCase())
+        const matchesCategory = categoryFilter === "Semua" || 
+                              (item.kategori && item.kategori.nama_kategori === categoryFilter)
         return matchesSearch && matchesCategory
     })
-
-    const categories = ["Semua", ...new Set(menuItems.map((item) => item.category))]
 
     return (
         <Box className="bg-[#FDFAF6] min-h-screen font-poppins">
             <Navbar toggleCart={toggleCart} activePage="order" />
 
             <Container maxWidth="xl" sx={{ pt: { xs: '140px', sm: '150px', md: '150px' }, pb: 8, px: { xs: 2, sm: 3, md: 4, lg: 6 } }}>
+                {error && (
+                    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
+                        <strong className="font-bold">Error!</strong>
+                        <span className="block sm:inline"> {error}</span>
+                    </div>
+                )}
+                
                 <Box sx={{ mb: { xs: 3, sm: 4, md: 5 } }}>
                     <Paper elevation={2} sx={{ p: { xs: 2, sm: 3 }, borderRadius: 2, backgroundColor: '#fff' }}>
                         <div className="flex flex-col md:flex-row justify-between items-center gap-3 md:gap-4">
@@ -98,12 +131,13 @@ const OrderMenu = () => {
                         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-4 sm:gap-6 md:gap-8 xl:gap-10 justify-center mx-auto" style={{ maxWidth: "1800px" }}>
                             {filteredItems.map((item) => (
                                 <Card
-                                    key={item.id}
-                                    id={item.id}
-                                    name={item.name}
-                                    image={item.image}
-                                    desc={item.desc}
-                                    price={item.price}
+                                    key={item.menu_id}
+                                    id={item.menu_id}
+                                    name={item.nama_menu}
+                                    image={item.image || '/default-menu-image.jpg'}
+                                    desc={item.deskripsi}
+                                    price={item.harga}
+                                    status={item.status}
                                 />
                             ))}
                         </div>

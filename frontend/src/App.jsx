@@ -12,7 +12,6 @@ import DashboardAdmin from './pages/admin/DashboardAdmin';
 import OrderManagement from './pages/admin/OrderManagement';
 import MenuManagement from './pages/admin/MenuManagement';
 import UserManagement from './pages/admin/UserManagement';
-import Help from './pages/admin/Help';
 
 const App = () => {
   return (
@@ -29,7 +28,6 @@ const App = () => {
           <Route path="/admin/pesanan" element={<OrderManagement />} />
           <Route path="/admin/menu" element={<MenuManagement />} />
           <Route path="/admin/pengguna" element={<UserManagement />} />
-          <Route path="/admin/bantuan" element={<Help />} />
         </Routes>
         <CartPopup />
       </Router>
