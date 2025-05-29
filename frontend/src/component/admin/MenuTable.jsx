@@ -1,4 +1,5 @@
 import React from 'react';
+import { FaEdit, FaTrash } from 'react-icons/fa';
 
 const MenuTable = ({ menus = [], loading = false, onEdit, onDelete }) => {
   const formatCurrency = (amount) => {
@@ -64,7 +65,7 @@ const MenuTable = ({ menus = [], loading = false, onEdit, onDelete }) => {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {menus.map((menu) => (
-              <tr key={menu.menu_id}>
+              <tr key={menu.menu_id} className="hover:bg-gray-50 transition-colors duration-150">
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {menu.menu_id}
                 </td>
@@ -82,18 +83,20 @@ const MenuTable = ({ menus = [], loading = false, onEdit, onDelete }) => {
                     {getStatusDisplay(menu.status)}
                   </span>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-3">
                   <button
                     onClick={() => onEdit(menu)}
-                    className="text-indigo-600 hover:text-indigo-900 mr-4"
+                    className="inline-flex items-center px-3 py-2 border border-indigo-500 text-indigo-500 hover:bg-indigo-500 hover:text-white rounded-md transition-colors duration-150 group"
                   >
-                    Edit
+                    <FaEdit className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
+                    <span>Edit</span>
                   </button>
                   <button
                     onClick={() => onDelete(menu.menu_id)}
-                    className="text-red-600 hover:text-red-900"
+                    className="inline-flex items-center px-3 py-2 border border-red-500 text-red-500 hover:bg-red-500 hover:text-white rounded-md transition-colors duration-150 group"
                   >
-                    Hapus
+                    <FaTrash className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
+                    <span>Hapus</span>
                   </button>
                 </td>
               </tr>

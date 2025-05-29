@@ -4,6 +4,7 @@ import AdminSidebar from '../../component/admin/AdminSidebar';
 import OrderTable from '../../component/admin/OrderTable';
 import OrderDetailModal from '../../component/admin/OrderDetailModal';
 import { Icon } from '@iconify/react';
+import Swal from 'sweetalert2';
 
 const OrderManagement = () => {
   const navigate = useNavigate();
@@ -20,111 +21,33 @@ const OrderManagement = () => {
     if (userRole !== 'admin') {
       navigate('/login');
     }
+    fetchOrders();
   }, [navigate]);
 
-  // Mock data - replace with actual API call
-  useEffect(() => {
-    const mockOrders = [
-      {
-        order_id: 'ORD001',
-        user: {
-          nama_lengkap: 'John Doe',
-          email: 'john@example.com'
-        },
-        status: 'pending',
-        total_harga: 45000,
-        pembayaran: 'QRIS',
-        create_at: '2024-01-15T10:30:00',
-        order_details: [
-          {
-            menu: { nama_menu: 'Nasi Gudeg', harga: 15000 },
-            jumlah: 2,
-            subtotal: 30000
-          },
-          {
-            menu: { nama_menu: 'Es Teh Manis', harga: 5000 },
-            jumlah: 3,
-            subtotal: 15000
-          }
-        ]
-      },
-      {
-        order_id: 'ORD002',
-        user: {
-          nama_lengkap: 'Jane Smith',
-          email: 'jane@example.com'
-        },
-        status: 'processing',
-        total_harga: 25000,
-        pembayaran: 'Cash',
-        create_at: '2024-01-15T11:15:00',
-        order_details: [
-          {
-            menu: { nama_menu: 'Soto Ayam', harga: 20000 },
-            jumlah: 1,
-            subtotal: 20000
-          },
-          {
-            menu: { nama_menu: 'Kerupuk', harga: 5000 },
-            jumlah: 1,
-            subtotal: 5000
-          }
-        ]
-      },
-      {
-        order_id: 'ORD003',
-        user: {
-          nama_lengkap: 'Bob Wilson',
-          email: 'bob@example.com'
-        },
-        status: 'completed',
-        total_harga: 35000,
-        pembayaran: 'E-Wallet',
-        create_at: '2024-01-14T14:20:00',
-        order_details: [
-          {
-            menu: { nama_menu: 'Gado-gado', harga: 18000 },
-            jumlah: 1,
-            subtotal: 18000
-          },
-          {
-            menu: { nama_menu: 'Jus Jeruk', harga: 8000 },
-            jumlah: 2,
-            subtotal: 16000
-          }
-        ]
-      },
-      {
-        order_id: 'ORD004',
-        user: {
-          nama_lengkap: 'Alice Brown',
-          email: 'alice@example.com'
-        },
-        status: 'cancelled',
-        total_harga: 30000,
-        pembayaran: 'QRIS',
-        create_at: '2024-01-14T09:45:00',
-        order_details: [
-          {
-            menu: { nama_menu: 'Ayam Bakar', harga: 25000 },
-            jumlah: 1,
-            subtotal: 25000
-          },
-          {
-            menu: { nama_menu: 'Nasi Putih', harga: 5000 },
-            jumlah: 1,
-            subtotal: 5000
-          }
-        ]
+  const fetchOrders = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/orders');
+      if (!response.ok) {
+        throw new Error('Gagal memuat data pesanan');
       }
-    ];
-
-    setTimeout(() => {
-      setOrders(mockOrders);
-      setFilteredOrders(mockOrders);
+      const data = await response.json();
+      const sortedOrders = (data.orders || []).sort((a, b) => 
+        new Date(b.create_at) - new Date(a.create_at)
+      );
+      setOrders(sortedOrders);
+      setFilteredOrders(sortedOrders);
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Gagal memuat data pesanan'
+      });
+    } finally {
       setLoading(false);
-    }, 1000);
-  }, []);
+    }
+  };
 
   // Filter orders based on search term and status
   useEffect(() => {
@@ -132,9 +55,9 @@ const OrderManagement = () => {
 
     if (searchTerm) {
       filtered = filtered.filter(order =>
-        order.order_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        order.user.nama_lengkap.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        order.user.email.toLowerCase().includes(searchTerm.toLowerCase())
+        order.order_id.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (order.user?.nama_lengkap || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (order.user?.email || '').toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -145,11 +68,43 @@ const OrderManagement = () => {
     setFilteredOrders(filtered);
   }, [searchTerm, statusFilter, orders]);
 
-  const handleStatusUpdate = (orderId, newStatus) => {
-    const updatedOrders = orders.map(order =>
-      order.order_id === orderId ? { ...order, status: newStatus } : order
-    );
-    setOrders(updatedOrders);
+  const handleStatusUpdate = async (orderId, newStatus) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/orders/${orderId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ status: newStatus })
+      });
+
+      if (!response.ok) {
+        throw new Error('Gagal memperbarui status pesanan');
+      }
+
+      // Update local state
+      const updatedOrders = orders.map(order =>
+        order.order_id === orderId ? { ...order, status: newStatus } : order
+      );
+      setOrders(updatedOrders);
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Berhasil!',
+        text: 'Status pesanan berhasil diperbarui',
+        timer: 1500,
+        showConfirmButton: false
+      });
+    } catch (error) {
+      console.error('Error updating order status:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Gagal memperbarui status pesanan'
+      });
+    }
   };
 
   const handleViewDetails = (order) => {
@@ -196,7 +151,7 @@ const OrderManagement = () => {
             <div className="bg-white rounded-lg shadow-md p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Pending</p>
+                  <p className="text-sm font-medium text-gray-600">Menunggu</p>
                   <p className="text-2xl font-bold text-yellow-600">{stats.pending}</p>
                 </div>
                 <Icon icon="material-symbols:pending" className="w-8 h-8 text-yellow-600" />
@@ -205,7 +160,7 @@ const OrderManagement = () => {
             <div className="bg-white rounded-lg shadow-md p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Processing</p>
+                  <p className="text-sm font-medium text-gray-600">Diproses</p>
                   <p className="text-2xl font-bold text-orange-600">{stats.processing}</p>
                 </div>
                 <Icon icon="material-symbols:sync" className="w-8 h-8 text-orange-600" />
@@ -214,7 +169,7 @@ const OrderManagement = () => {
             <div className="bg-white rounded-lg shadow-md p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Completed</p>
+                  <p className="text-sm font-medium text-gray-600">Selesai</p>
                   <p className="text-2xl font-bold text-green-600">{stats.completed}</p>
                 </div>
                 <Icon icon="material-symbols:check-circle" className="w-8 h-8 text-green-600" />
@@ -223,7 +178,7 @@ const OrderManagement = () => {
             <div className="bg-white rounded-lg shadow-md p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Cancelled</p>
+                  <p className="text-sm font-medium text-gray-600">Dibatalkan</p>
                   <p className="text-2xl font-bold text-red-600">{stats.cancelled}</p>
                 </div>
                 <Icon icon="material-symbols:cancel" className="w-8 h-8 text-red-600" />
@@ -248,24 +203,24 @@ const OrderManagement = () => {
                     placeholder="Cari berdasarkan ID, nama, atau email..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               </div>
-              <div className="md:w-48">
+              <div className="md:w-64">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Filter Status
                 </label>
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="all">Semua Status</option>
-                  <option value="pending">Pending</option>
-                  <option value="processing">Processing</option>
-                  <option value="completed">Completed</option>
-                  <option value="cancelled">Cancelled</option>
+                  <option value="pending">Menunggu</option>
+                  <option value="processing">Diproses</option>
+                  <option value="completed">Selesai</option>
+                  <option value="cancelled">Dibatalkan</option>
                 </select>
               </div>
             </div>
@@ -280,12 +235,13 @@ const OrderManagement = () => {
           />
 
           {/* Order Detail Modal */}
-          <OrderDetailModal
-            order={selectedOrder}
-            isOpen={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
-            onStatusUpdate={handleStatusUpdate}
-          />
+          {selectedOrder && (
+            <OrderDetailModal
+              isOpen={isModalOpen}
+              onClose={() => setIsModalOpen(false)}
+              order={selectedOrder}
+            />
+          )}
         </div>
       </div>
     </div>

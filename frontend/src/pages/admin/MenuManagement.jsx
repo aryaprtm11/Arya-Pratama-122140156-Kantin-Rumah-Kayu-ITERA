@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import AdminSidebar from '../../component/admin/AdminSidebar';
 import MenuTable from '../../component/admin/MenuTable';
 import MenuFormModal from '../../component/admin/MenuFormModal';
+import Swal from 'sweetalert2';
 
 const MenuManagement = () => {
   const navigate = useNavigate();
@@ -40,27 +41,11 @@ const MenuManagement = () => {
 
   const fetchCategories = async () => {
     try {
-      console.log('Fetching categories...');
       const response = await fetch('/api/kategori');
-      console.log('Response status:', response.status);
-      console.log('Response headers:', response.headers);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
       const data = await response.json();
-      console.log('Categories data:', data);
-      
-      if (!data.kategoris) {
-        throw new Error('Data kategori tidak ditemukan dalam response');
-      }
-      
-      setCategories(data.kategoris);
-      console.log('Categories set successfully:', data.kategoris);
+      setCategories(data.kategoris || []);
     } catch (err) {
-      console.error('Error fetching categories:', err);
-      setError('Gagal memuat data kategori: ' + err.message);
+      setError('Gagal memuat data kategori');
     }
   };
 
@@ -75,16 +60,45 @@ const MenuManagement = () => {
   };
 
   const handleDeleteClick = async (menuId) => {
-    if (!window.confirm('Apakah Anda yakin ingin menghapus menu ini?')) return;
-    try {
-      const response = await fetch(`/api/menu/${menuId}`, { method: 'DELETE' });
-      if (response.ok) {
-        fetchMenus();
-      } else {
-        alert('Gagal menghapus menu');
+    // Konfirmasi penghapusan dengan Sweet Alert
+    const result = await Swal.fire({
+      title: 'Apakah Anda yakin?',
+      text: "Menu yang dihapus tidak dapat dikembalikan!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Ya, hapus!',
+      cancelButtonText: 'Batal'
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const response = await fetch(`/api/menu/${menuId}`, {
+          method: 'DELETE',
+        });
+
+        if (!response.ok) {
+          throw new Error('Gagal menghapus menu');
+        }
+
+        // Tampilkan notifikasi sukses
+        await Swal.fire({
+          icon: 'success',
+          title: 'Berhasil!',
+          text: 'Menu telah dihapus',
+          timer: 1500,
+          showConfirmButton: false
+        });
+
+        fetchMenus(); // Refresh daftar menu
+      } catch (err) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: 'Gagal menghapus menu',
+        });
       }
-    } catch (err) {
-      alert('Gagal menghapus menu');
     }
   };
 
@@ -95,38 +109,42 @@ const MenuManagement = () => {
 
   const handleFormSubmit = async (formData) => {
     try {
-      const method = editingMenu ? 'PUT' : 'POST';
-      const url = editingMenu ? `/api/menu/${editingMenu.menu_id}` : '/api/menu';
+      const url = editingMenu
+        ? `/api/menu/${editingMenu.menu_id}`
+        : '/api/menu';
       
-      console.log('Sending request:', {
-        method,
-        url,
-        formData
-      });
+      const method = editingMenu ? 'PUT' : 'POST';
       
       const response = await fetch(url, {
         method,
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json'
         },
         body: JSON.stringify(formData),
       });
-      
-      const responseData = await response.json();
-      console.log('Response:', responseData);
-      
-      if (response.ok) {
-        fetchMenus();
-        handleModalClose();
-      } else {
-        const message = responseData.error || 'Gagal menyimpan menu';
-        console.error('Error saving menu:', message);
-        alert(message);
+
+      if (!response.ok) {
+        throw new Error('Gagal menyimpan menu');
       }
+
+      // Tampilkan notifikasi sukses
+      await Swal.fire({
+        icon: 'success',
+        title: 'Berhasil!',
+        text: editingMenu ? 'Menu berhasil diperbarui' : 'Menu baru berhasil ditambahkan',
+        timer: 1500,
+        showConfirmButton: false
+      });
+
+      setModalOpen(false);
+      setEditingMenu(null);
+      fetchMenus(); // Refresh daftar menu
     } catch (err) {
-      console.error('Error saving menu:', err);
-      alert('Gagal menyimpan menu: ' + err.message);
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Gagal menyimpan menu',
+      });
     }
   };
 

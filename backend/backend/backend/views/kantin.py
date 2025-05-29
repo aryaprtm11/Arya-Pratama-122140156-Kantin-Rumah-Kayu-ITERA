@@ -6,6 +6,8 @@ from pyramid.httpexceptions import (
     HTTPBadRequest,
 )
 from ..models import Menu, Kategori, Users, Orders, OrderDetails, Keranjang, Roles
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine
 
 
 # ===== MENU VIEWS =====
@@ -272,7 +274,7 @@ def user_register(request):
             nama_lengkap=json_data['nama_lengkap'],
             email=json_data['email'],
             password=json_data['password'],  # Should be hashed in production
-            role_id=2,  # Set role_id 2 for pembeli (role sudah ada di database)
+            role_id=1,  # Set role_id 1 untuk pembeli
             is_active=True
         )
         
@@ -296,62 +298,200 @@ def user_register(request):
 @view_config(route_name='order_list', renderer='json')
 def order_list(request):
     """View untuk menampilkan daftar orders"""
-    dbsession = request.dbsession
-    orders = dbsession.query(Orders).all()
-    return {'orders': [o.to_dict() for o in orders]}
+    try:
+        # Add CORS headers
+        request.response.headers.update({
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET',
+            'Access-Control-Allow-Headers': 'Content-Type,Accept,Authorization'
+        })
+
+        dbsession = request.dbsession
+        
+        # Query orders dengan join ke user untuk mendapatkan informasi pembeli
+        orders = dbsession.query(Orders).join(Users, Orders.user_id == Users.user_id).all()
+        
+        # Format response dengan informasi lengkap
+        order_list = []
+        for order in orders:
+            order_data = order.to_dict()
+            
+            # Tambahkan informasi user
+            order_data['user'] = {
+                'user_id': order.user.user_id,
+                'nama_lengkap': order.user.nama_lengkap,
+                'email': order.user.email
+            }
+            
+            # Tambahkan detail items
+            order_details = dbsession.query(OrderDetails).filter_by(order_id=order.order_id).all()
+            order_data['items'] = []
+            
+            for detail in order_details:
+                menu = dbsession.query(Menu).filter_by(menu_id=detail.menu_id).first()
+                if menu:
+                    order_data['items'].append({
+                        'menu_id': menu.menu_id,
+                        'nama_menu': menu.nama_menu,
+                        'jumlah': detail.jumlah,
+                        'harga': menu.harga,
+                        'subtotal': detail.subtotal
+                    })
+            
+            order_list.append(order_data)
+            
+        return {
+            'success': True,
+            'orders': order_list
+        }
+            
+    except Exception as e:
+        print("Error fetching orders:", str(e))
+        return HTTPBadRequest(json_body={'error': str(e)})
 
 
 @view_config(route_name='order_create', request_method='POST', renderer='json')
 def order_create(request):
     """View untuk membuat order baru"""
     try:
+        print("Received order data:", request.json_body)  # Debug print
         json_data = request.json_body
         
-        required_fields = ['user_id', 'items']
+        # Validasi data yang diperlukan
+        required_fields = ['user_id', 'items', 'pembayaran']
         for field in required_fields:
             if field not in json_data:
+                print(f"Missing required field: {field}")  # Debug print
                 return HTTPBadRequest(json_body={'error': f'Field {field} wajib diisi'})
         
         dbsession = request.dbsession
         
+        # Validasi user exists
+        user = dbsession.query(Users).filter_by(user_id=json_data['user_id']).first()
+        if not user:
+            print(f"User not found: {json_data['user_id']}")  # Debug print
+            return HTTPBadRequest(json_body={'error': 'User tidak ditemukan'})
+        
         # Create order
-        order = Orders(
-            user_id=json_data['user_id'],
-            status='pending',
-            total_harga=0,
-            pembayaran=json_data.get('pembayaran', 'tunai')
-        )
-        
-        dbsession.add(order)
-        dbsession.flush()
-        
-        total_harga = 0
-        
-        # Create order details
-        for item in json_data['items']:
-            menu = dbsession.query(Menu).filter_by(menu_id=item['menu_id']).first()
-            if not menu:
-                return HTTPBadRequest(json_body={'error': f'Menu dengan ID {item["menu_id"]} tidak ditemukan'})
-            
-            subtotal = menu.harga * item['jumlah']
-            total_harga += subtotal
-            
-            order_detail = OrderDetails(
-                order_id=order.order_id,
-                menu_id=item['menu_id'],
-                jumlah=item['jumlah'],
-                subtotal=subtotal
+        try:
+            order = Orders(
+                user_id=json_data['user_id'],
+                status='pending',
+                total_harga=0,
+                pembayaran=json_data['pembayaran'],
+                create_at=datetime.datetime.now()
             )
             
-            dbsession.add(order_detail)
-        
-        # Update total harga
-        order.total_harga = total_harga
-        
-        return {'success': True, 'order': order.to_dict(), 'total_harga': total_harga}
+            dbsession.add(order)
+            dbsession.flush()  # Flush untuk mendapatkan order_id
+            
+            print(f"Order created with ID: {order.order_id}")  # Debug print
+            
+            total_harga = 0
+            
+            # Create order details
+            for item in json_data['items']:
+                menu = dbsession.query(Menu).filter_by(menu_id=item['menu_id']).first()
+                if not menu:
+                    print(f"Menu not found: {item['menu_id']}")  # Debug print
+                    raise Exception(f'Menu dengan ID {item["menu_id"]} tidak ditemukan')
+                
+                subtotal = menu.harga * item['jumlah']
+                total_harga += subtotal
+                
+                order_detail = OrderDetails(
+                    order_id=order.order_id,
+                    menu_id=item['menu_id'],
+                    jumlah=item['jumlah'],
+                    subtotal=subtotal
+                )
+                
+                dbsession.add(order_detail)
+                print(f"Added order detail for menu {menu.menu_id}")  # Debug print
+            
+            # Update total harga
+            order.total_harga = total_harga
+            
+            # Commit transaction
+            dbsession.flush()
+            transaction.commit()
+            
+            print(f"Order completed with total: {total_harga}")  # Debug print
+            
+            # Kosongkan keranjang setelah order berhasil dibuat
+            dbsession.query(Keranjang).filter_by(user_id=json_data['user_id']).delete()
+            dbsession.flush()
+            
+            return {
+                'success': True,
+                'message': 'Pesanan berhasil dibuat',
+                'order': {
+                    'order_id': order.order_id,
+                    'user_id': order.user_id,
+                    'status': order.status,
+                    'total_harga': order.total_harga,
+                    'pembayaran': order.pembayaran,
+                    'create_at': order.create_at.isoformat() if order.create_at else None
+                }
+            }
+            
+        except Exception as e:
+            print(f"Error creating order: {str(e)}")  # Debug print
+            transaction.abort()
+            raise
             
     except Exception as e:
+        print("Order creation error:", str(e))  # Debug print
+        import traceback
+        traceback.print_exc()
         return HTTPBadRequest(json_body={'error': str(e)})
+
+
+@view_config(route_name='order_update', request_method='PUT', renderer='json')
+def order_update(request):
+    """View untuk mengupdate status pesanan"""
+    try:
+        # Add CORS headers
+        request.response.headers.update({
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'PUT',
+            'Access-Control-Allow-Headers': 'Content-Type,Accept,Authorization'
+        })
+
+        order_id = request.matchdict['id']
+        json_data = request.json_body
+        
+        if 'status' not in json_data:
+            return HTTPBadRequest(json_body={'error': 'Status pesanan wajib diisi'})
+            
+        dbsession = request.dbsession
+        order = dbsession.query(Orders).filter_by(order_id=order_id).first()
+        
+        if order is None:
+            return HTTPNotFound(json_body={'error': 'Pesanan tidak ditemukan'})
+            
+        # Update status
+        order.status = json_data['status']
+        dbsession.flush()
+        
+        return {'success': True, 'message': 'Status pesanan berhasil diperbarui', 'order': order.to_dict()}
+            
+    except Exception as e:
+        print("Error updating order:", str(e))
+        return HTTPBadRequest(json_body={'error': str(e)})
+
+
+@view_config(route_name='order_update', request_method='OPTIONS', renderer='json')
+def order_update_options(request):
+    """Handle OPTIONS request for CORS preflight"""
+    response = request.response
+    response.headers.update({
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'PUT',
+        'Access-Control-Allow-Headers': 'Content-Type,Accept,Authorization',
+        'Access-Control-Max-Age': '3600'
+    })
+    return {}
 
 
 # ===== KERANJANG VIEWS =====

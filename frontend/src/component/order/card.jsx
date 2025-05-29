@@ -1,11 +1,32 @@
 import { useCart } from "../../pages/cart";
 import Swal from "sweetalert2";
 import { FaPlus } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 function Card({ id, name, image, desc, price, status }) {
   const { addToCart } = useCart();
+  const navigate = useNavigate();
 
   const handleAdd = () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      Swal.fire({
+        title: 'Login Diperlukan',
+        text: 'Silakan login terlebih dahulu untuk menambahkan menu ke keranjang',
+        icon: 'info',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Login Sekarang',
+        cancelButtonText: 'Batal'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          navigate('/login');
+        }
+      });
+      return;
+    }
+
     addToCart({ id, name, price });
 
     Swal.fire({
