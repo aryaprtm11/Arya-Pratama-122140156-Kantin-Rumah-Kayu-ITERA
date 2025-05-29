@@ -89,6 +89,11 @@ const OrderManagement = () => {
         order.order_id === orderId ? { ...order, status: newStatus } : order
       );
       setOrders(updatedOrders);
+      
+      // Update selectedOrder jika yang diupdate adalah order yang sedang ditampilkan di modal
+      if (selectedOrder && selectedOrder.order_id === orderId) {
+        setSelectedOrder({ ...selectedOrder, status: newStatus });
+      }
 
       Swal.fire({
         icon: 'success',
@@ -240,6 +245,7 @@ const OrderManagement = () => {
               isOpen={isModalOpen}
               onClose={() => setIsModalOpen(false)}
               order={selectedOrder}
+              onStatusUpdate={handleStatusUpdate}
             />
           )}
         </div>

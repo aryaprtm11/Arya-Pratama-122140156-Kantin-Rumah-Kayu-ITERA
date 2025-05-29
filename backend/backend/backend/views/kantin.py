@@ -8,6 +8,8 @@ from pyramid.httpexceptions import (
 from ..models import Menu, Kategori, Users, Orders, OrderDetails, Keranjang, Roles
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
+from pyramid.response import Response
+import transaction
 
 
 # ===== MENU VIEWS =====
@@ -354,6 +356,13 @@ def order_list(request):
 def order_create(request):
     """View untuk membuat order baru"""
     try:
+        # Add CORS headers
+        request.response.headers.update({
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'POST',
+            'Access-Control-Allow-Headers': 'Content-Type,Accept,Authorization'
+        })
+
         print("Received order data:", request.json_body)  # Debug print
         json_data = request.json_body
         
@@ -376,7 +385,7 @@ def order_create(request):
         try:
             order = Orders(
                 user_id=json_data['user_id'],
-                status='pending',
+                status='menunggu',  # Mengubah status default menjadi 'menunggu'
                 total_harga=0,
                 pembayaran=json_data['pembayaran'],
                 create_at=datetime.datetime.now()
@@ -412,15 +421,13 @@ def order_create(request):
             # Update total harga
             order.total_harga = total_harga
             
+            # Kosongkan keranjang setelah order berhasil dibuat
+            dbsession.query(Keranjang).filter_by(user_id=json_data['user_id']).delete()
+            
             # Commit transaction
-            dbsession.flush()
             transaction.commit()
             
             print(f"Order completed with total: {total_harga}")  # Debug print
-            
-            # Kosongkan keranjang setelah order berhasil dibuat
-            dbsession.query(Keranjang).filter_by(user_id=json_data['user_id']).delete()
-            dbsession.flush()
             
             return {
                 'success': True,

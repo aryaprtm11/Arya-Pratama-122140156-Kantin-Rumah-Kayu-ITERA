@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import AdminSidebar from '../../component/admin/AdminSidebar';
 import StatusCard from '../../component/admin/StatusCard';
 import RecentOrdersTable from '../../component/admin/RecentOrdersTable';
+import IncomeChart from '../../component/admin/IncomeChart';
 
 const DashboardAdmin = () => {
   const navigate = useNavigate();
@@ -25,17 +26,17 @@ const DashboardAdmin = () => {
   const fetchDashboardData = async () => {
     try {
       // Fetch total penghasilan dan pesanan
-      const ordersResponse = await fetch('/api/orders');
+      const ordersResponse = await fetch('http://localhost:6543/api/orders');
       const ordersData = await ordersResponse.json();
       const orders = ordersData.orders || [];
       const totalPenghasilan = orders.reduce((sum, order) => sum + (order.total_harga || 0), 0);
       
       // Fetch total menu
-      const menuResponse = await fetch('/api/menu');
+      const menuResponse = await fetch('http://localhost:6543/api/menu');
       const menuData = await menuResponse.json();
       
       // Fetch total pengguna
-      const usersResponse = await fetch('/api/users');
+      const usersResponse = await fetch('http://localhost:6543/api/users');
       const usersData = await usersResponse.json();
       
       setDashboardData({
@@ -43,7 +44,7 @@ const DashboardAdmin = () => {
         totalPesanan: orders.length,
         totalMenu: (menuData.menus || []).length,
         totalPengguna: (usersData.users || []).length,
-        recentOrders: orders.slice(0, 5) // Ambil 5 pesanan terbaru
+        recentOrders: orders // Simpan semua orders untuk grafik
       });
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
@@ -105,7 +106,7 @@ const DashboardAdmin = () => {
         {/* Main Content */}
         <div className="flex-1 p-8">
           {/* Status Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             {statusCards.map((card, index) => (
               <StatusCard
                 key={index}
@@ -119,8 +120,20 @@ const DashboardAdmin = () => {
             ))}
           </div>
 
+          {/* Income Chart */}
+          {dashboardData.recentOrders.length > 0 ? (
+            <IncomeChart orders={dashboardData.recentOrders} />
+          ) : (
+            <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+              <h2 className="text-xl font-semibold text-gray-800 mb-4">Grafik Penghasilan per Bulan</h2>
+              <div className="text-center text-gray-500 py-8">
+                Memuat data...
+              </div>
+            </div>
+          )}
+
           {/* Recent Orders Table Component */}
-          <RecentOrdersTable orders={dashboardData.recentOrders} />
+          <RecentOrdersTable orders={dashboardData.recentOrders.slice(0, 5)} />
         </div>
       </div>
     </div>
