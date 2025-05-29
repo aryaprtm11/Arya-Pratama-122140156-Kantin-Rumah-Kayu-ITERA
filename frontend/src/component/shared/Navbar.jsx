@@ -3,6 +3,7 @@ import { Paper } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import IteraLogo from "../../assets/itera.png";
 import BurgerMenu from "./BurgerMenu";
+import ProfileDropdown from "../ProfileDropdown";
 
 const Navbar = ({ toggleCart, activePage = '' }) => {
   const navigate = useNavigate();
@@ -83,16 +84,8 @@ const Navbar = ({ toggleCart, activePage = '' }) => {
                 </button>
               </li>
             ) : (
-              <li className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <span className="text-gray-700">{userData.nama_lengkap}</span>
-                  <button
-                    onClick={handleLogout}
-                    className="text-sm text-red-600 hover:text-red-700"
-                  >
-                    Keluar
-                  </button>
-                </div>
+              <li>
+                <ProfileDropdown username={userData.nama_lengkap} />
               </li>
             )}
           </ul>

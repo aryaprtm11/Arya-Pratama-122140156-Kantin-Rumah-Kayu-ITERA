@@ -25,9 +25,7 @@ const BurgerMenu = ({ toggleCart, userData }) => {
     }
 
     const handleLogout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('userData');
-        localStorage.removeItem('userRole');
+        localStorage.clear();
         navigate('/login');
         setOpen(false);
     }
@@ -41,7 +39,6 @@ const BurgerMenu = ({ toggleCart, userData }) => {
     const menuItems = userData 
         ? [
             ...defaultMenuItems,
-            { text: 'Profil', icon: <FaUser size={20} />, path: '/profile' },
             { text: 'Keluar', icon: <FaSignOutAlt size={20} />, onClick: handleLogout },
         ]
         : [
