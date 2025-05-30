@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "./cart";
+import { isAuthenticated, getCurrentUser } from "../utils/auth";
 import PaymentTabs from "../component/checkout/paymentTabs";
 import Ewallet from "../component/checkout/eWallet";
 import Qris from "../component/checkout/qris";
@@ -15,8 +16,7 @@ const Checkout = () => {
 
     // Tambahkan useEffect untuk cek autentikasi
     useEffect(() => {
-        const userData = localStorage.getItem('userData');
-        if (!userData) {
+        if (!isAuthenticated()) {
             Swal.fire({
                 icon: 'warning',
                 title: 'Silakan Login',
@@ -32,7 +32,7 @@ const Checkout = () => {
 
     const createOrder = async () => {
         try {
-            const userData = JSON.parse(localStorage.getItem('userData'));
+            const userData = getCurrentUser();
             if (!userData || !userData.user_id) {
                 throw new Error('User tidak terautentikasi');
             }
@@ -56,7 +56,6 @@ const Checkout = () => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
                 },
                 body: JSON.stringify(orderData),
             });

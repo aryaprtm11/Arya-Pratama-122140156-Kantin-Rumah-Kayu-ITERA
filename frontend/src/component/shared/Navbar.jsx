@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Paper } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { getCurrentUser, logout as authLogout } from '../../utils/auth';
 import IteraLogo from "../../assets/itera.png";
 import BurgerMenu from "./BurgerMenu";
 import ProfileDropdown from "../ProfileDropdown";
@@ -9,17 +10,30 @@ const Navbar = ({ toggleCart, activePage = '' }) => {
   const navigate = useNavigate();
   const [userData, setUserData] = useState(null);
 
+  const checkUserData = () => {
+    const user = getCurrentUser();
+    setUserData(user);
+  };
+
   useEffect(() => {
-    const userDataStr = localStorage.getItem('userData');
-    if (userDataStr) {
-      setUserData(JSON.parse(userDataStr));
-    }
+    checkUserData();
+    
+    // Listen for login/logout events
+    const handleUserLogin = () => checkUserData();
+    const handleUserLogout = () => setUserData(null);
+    
+    window.addEventListener('userLogin', handleUserLogin);
+    window.addEventListener('userLogout', handleUserLogout);
+    
+    return () => {
+      window.removeEventListener('userLogin', handleUserLogin);
+      window.removeEventListener('userLogout', handleUserLogout);
+    };
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('userData');
-    localStorage.removeItem('userRole');
+    authLogout();
+    setUserData(null);
     navigate('/login');
   };
 
@@ -85,13 +99,16 @@ const Navbar = ({ toggleCart, activePage = '' }) => {
               </li>
             ) : (
               <li>
-                <ProfileDropdown username={userData.nama_lengkap} />
+                <ProfileDropdown 
+                  username={userData.nama_lengkap} 
+                  onLogout={handleLogout}
+                />
               </li>
             )}
           </ul>
           
           <div className="flex items-center">
-            <BurgerMenu toggleCart={toggleCart} userData={userData} />
+            <BurgerMenu toggleCart={toggleCart} userData={userData} onLogout={handleLogout} />
           </div>
         </div>
       </div>

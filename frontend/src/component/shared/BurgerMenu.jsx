@@ -3,7 +3,7 @@ import { FaBars, FaTimes, FaShoppingCart, FaHome, FaUtensils, FaQuestionCircle, 
 import { useNavigate } from "react-router-dom"
 import { Drawer, List, ListItem, ListItemIcon, ListItemText, IconButton, Box, Typography, Divider } from '@mui/material'
 
-const BurgerMenu = ({ toggleCart, userData }) => {
+const BurgerMenu = ({ toggleCart, userData, onLogout }) => {
     const [open, setOpen] = useState(false)
     const navigate = useNavigate()
 
@@ -25,8 +25,12 @@ const BurgerMenu = ({ toggleCart, userData }) => {
     }
 
     const handleLogout = () => {
-        localStorage.clear();
-        navigate('/login');
+        if (onLogout) {
+            onLogout();
+        } else {
+            sessionStorage.removeItem('user');
+            navigate('/login');
+        }
         setOpen(false);
     }
 

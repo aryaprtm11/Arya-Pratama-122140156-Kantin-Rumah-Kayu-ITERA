@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import './App.css';
 import Home from './pages/home';
 import OrderMenu from './pages/order';
@@ -16,21 +16,19 @@ import UserManagement from './pages/admin/UserManagement';
 const App = () => {
   return (
     <CartProvider>
-      <Router>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/" element={<Home />} />
-          <Route path="/order" element={<OrderMenu />} />
-          <Route path="/checkout" element={<Checkout />} />
-          <Route path="/bantuan" element={<Bantuan />} />
-          <Route path="/admin/dashboard" element={<DashboardAdmin />} />
-          <Route path="/admin/pesanan" element={<OrderManagement />} />
-          <Route path="/admin/menu" element={<MenuManagement />} />
-          <Route path="/admin/pengguna" element={<UserManagement />} />
-        </Routes>
-        <CartPopup />
-      </Router>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/" element={<Home />} />
+        <Route path="/order" element={<OrderMenu />} />
+        <Route path="/checkout" element={<Checkout />} />
+        <Route path="/bantuan" element={<Bantuan />} />
+        <Route path="/admin/dashboard" element={<DashboardAdmin />} />
+        <Route path="/admin/pesanan" element={<OrderManagement />} />
+        <Route path="/admin/menu" element={<MenuManagement />} />
+        <Route path="/admin/pengguna" element={<UserManagement />} />
+      </Routes>
+      <CartPopup />
     </CartProvider>
   );
 };

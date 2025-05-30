@@ -16,10 +16,25 @@ const DashboardAdmin = () => {
   });
 
   useEffect(() => {
-    const userRole = localStorage.getItem('userRole');
-    if (userRole !== 'admin') {
+    // Cek apakah user adalah admin
+    const userData = sessionStorage.getItem('user');
+    if (!userData) {
       navigate('/login');
+      return;
     }
+    
+    try {
+      const user = JSON.parse(userData);
+      if (user.role_id !== 2) {
+        navigate('/login');
+        return;
+      }
+    } catch (error) {
+      console.error('Error parsing user data:', error);
+      navigate('/login');
+      return;
+    }
+
     fetchDashboardData();
   }, [navigate]);
 

@@ -14,6 +14,7 @@ import {
 import { FaTimes, FaTrash, FaMinus, FaPlus } from 'react-icons/fa';
 import { useCart } from '../../pages/cart';
 import { useNavigate } from 'react-router-dom';
+import { isAuthenticated } from '../../utils/auth';
 
 const CartDrawer = ({ isOpen, onClose }) => {
   const { 
@@ -26,7 +27,7 @@ const CartDrawer = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
 
   const handleCheckoutClick = () => {
-    if (!localStorage.getItem('token')) {
+    if (!isAuthenticated()) {
       Swal.fire({
         title: 'Login Diperlukan',
         text: 'Silakan login terlebih dahulu untuk melanjutkan pembayaran',

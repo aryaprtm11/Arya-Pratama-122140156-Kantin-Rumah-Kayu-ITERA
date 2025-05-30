@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 const Register = () => {
-  const [name, setName] = useState('');
+  const [nama_lengkap, setNama_lengkap] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -17,7 +17,7 @@ const Register = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name,
+          nama_lengkap,
           email,
           password,
         }),
@@ -28,11 +28,11 @@ const Register = () => {
       if (response.ok) {
         navigate('/login');
       } else {
-        setError(data.error || 'Registration failed');
+        setError(data.error || 'Registrasi gagal. Silakan coba lagi.');
       }
     } catch (error) {
       console.error('Error:', error);
-      setError('An error occurred during registration');
+      setError('Terjadi kesalahan saat registrasi. Silakan coba lagi.');
     }
   };
 
@@ -68,14 +68,14 @@ const Register = () => {
             <div>
               <div className="relative">
                 <input
-                  id="name"
-                  name="name"
+                  id="nama_lengkap"
+                  name="nama"
                   type="text"
                   required
                   className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#4CAF50] focus:border-transparent"
                   placeholder="Nama Lengkap"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  value={nama_lengkap}
+                  onChange={(e) => setNama_lengkap(e.target.value)}
                 />
                 <span className="absolute left-3 top-1/2 transform -translate-y-1/2">
                   <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">

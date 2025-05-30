@@ -9,6 +9,8 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+
     try {
       const response = await fetch('http://localhost:6543/api/login', {
         method: 'POST',
@@ -23,15 +25,27 @@ const Login = () => {
       
       const data = await response.json();
       
-      if (response.ok) {
-        localStorage.setItem('token', data.token);
-        navigate('/order');
+      if (!response.ok) {
+        throw new Error(data.error || 'Login gagal');
+      }
+
+      // Simpan data user untuk sesi ini
+      sessionStorage.setItem('user', JSON.stringify(data.user));
+      
+      // Dispatch event untuk update navbar
+      window.dispatchEvent(new Event('userLogin'));
+      
+      // Redirect berdasarkan role_id
+      const roleId = data.user.role_id;
+      
+      if (roleId === 2) {
+        navigate('/admin/dashboard', { replace: true });
       } else {
-        setError('Login failed. Please check your credentials.');
+        navigate('/order', { replace: true });
       }
     } catch (error) {
-      console.error('Error:', error);
-      setError('An error occurred during login.');
+      console.error('Error during login:', error);
+      setError(error.message || 'Terjadi kesalahan saat login. Silakan coba lagi.');
     }
   };
 

@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
 
-const ProfileDropdown = ({ username }) => {
+const ProfileDropdown = ({ username, onLogout }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
@@ -19,8 +19,13 @@ const ProfileDropdown = ({ username }) => {
   }, []);
 
   const handleLogout = () => {
-    localStorage.clear();
-    navigate('/login');
+    if (onLogout) {
+      onLogout();
+    } else {
+      sessionStorage.removeItem('user');
+      navigate('/login');
+    }
+    setIsOpen(false);
   };
 
   return (

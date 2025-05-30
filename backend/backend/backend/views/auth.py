@@ -2,6 +2,7 @@ from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPBadRequest, HTTPNotFound
 from ..models import Users, Roles
 from pyramid.response import Response
+import uuid
 
 @view_config(route_name='login', request_method='POST', renderer='json')
 def login(request):
@@ -30,13 +31,17 @@ def login(request):
         # Get user role
         role = dbsession.query(Roles).get(user.role_id)
         
+        # Generate a secure token
+        token = str(uuid.uuid4())
+        
         # Create response with token
         response = {
-            'token': 'dummy-token',  # In production, use proper JWT token
+            'token': token,
             'user': {
                 'user_id': user.user_id,
                 'nama_lengkap': user.nama_lengkap,
                 'email': user.email,
+                'role_id': user.role_id,
                 'role_name': role.role_name if role else None
             }
         }

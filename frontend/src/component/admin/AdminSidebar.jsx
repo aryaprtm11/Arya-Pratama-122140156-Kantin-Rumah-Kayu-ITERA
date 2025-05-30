@@ -6,7 +6,7 @@ const AdminSidebar = ({ activeMenu = 'dashboard' }) => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem('userRole');
+    sessionStorage.removeItem('user');
     navigate('/login');
   };
 
