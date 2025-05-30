@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
 
 const Register = () => {
   const [name, setName] = useState('');
@@ -12,42 +11,28 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:6543/api/register', {
-        nama_lengkap: name,
-        email,
-        password,
-      }, {
+      const response = await fetch('http://localhost:6543/api/register', {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        }
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          password,
+        }),
       });
       
-      console.log('Register response:', response.data);
+      const data = await response.json();
       
-      if (response.data.success) {
-        // Simpan token jika ada
-        if (response.data.token) {
-          localStorage.setItem('token', response.data.token);
-        }
-        // Simpan data user jika ada
-        if (response.data.user) {
-          localStorage.setItem('userData', JSON.stringify(response.data.user));
-        }
+      if (response.ok) {
         navigate('/login');
-      }
-    } catch (err) {
-      console.error('Register error:', err);
-      if (err.response) {
-        console.error('Error response:', err.response);
-        setError(err.response.data?.error || 'Terjadi kesalahan saat registrasi');
-      } else if (err.request) {
-        console.error('Error request:', err.request);
-        setError('Tidak dapat terhubung ke server');
       } else {
-        console.error('Error:', err.message);
-        setError('Terjadi kesalahan saat registrasi');
+        setError(data.error || 'Registration failed');
       }
+    } catch (error) {
+      console.error('Error:', error);
+      setError('An error occurred during registration');
     }
   };
 

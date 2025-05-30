@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -43,16 +42,20 @@ const PaymentForm = ({ cartItems, totalAmount, onSuccess, onCancel }) => {
 
       console.log('Sending order data:', orderData);
 
-      const response = await axios.post('/api/orders', orderData, {
+      const response = await fetch('/api/orders', {
+        method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
-        }
+        },
+        body: JSON.stringify(orderData)
       });
 
-      console.log('Order response:', response.data);
+      const data = await response.json();
 
-      if (response.data.success) {
+      console.log('Order response:', data);
+
+      if (data.success) {
         await Swal.fire({
           icon: 'success',
           title: 'Pembayaran Berhasil!',

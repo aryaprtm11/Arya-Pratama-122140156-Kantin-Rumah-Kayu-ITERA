@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react"
-import axios from "axios"
 import Card from "../component/order/card"
 import { FaShoppingCart, FaUtensils } from "react-icons/fa"
 import { useCart } from "./cart"
@@ -17,9 +16,6 @@ import {
   Chip
 } from '@mui/material'
 
-// Konfigurasi axios
-axios.defaults.baseURL = 'http://localhost:6543'
-
 const OrderMenu = () => {
     const [menuItems, setMenuItems] = useState([])
     const [categories, setCategories] = useState(["Semua"])
@@ -29,33 +25,39 @@ const OrderMenu = () => {
     const [error, setError] = useState(null)
     const { toggleCart } = useCart()
 
+    const fetchMenu = async () => {
+        try {
+            const response = await fetch('http://localhost:6543/api/menu');
+            const data = await response.json();
+            if (response.ok) {
+                setMenuItems(data.menus);
+            }
+        } catch (error) {
+            console.error('Error fetching menu:', error);
+        }
+    };
+
+    const fetchCategories = async () => {
+        try {
+            const response = await fetch('http://localhost:6543/api/kategori');
+            const data = await response.json();
+            if (response.ok) {
+                const categoryNames = ["Semua", ...data.kategoris.map(cat => cat.nama_kategori)]
+                console.log('Category names:', categoryNames)
+                setCategories(categoryNames)
+            }
+        } catch (error) {
+            console.error('Error fetching categories:', error);
+        }
+    };
+
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true)
             setError(null)
             try {
-                // Fetch menu items
-                const menuResponse = await axios.get('/api/menu')
-                console.log('Menu data:', menuResponse.data)
-                
-                if (!menuResponse.data.menus) {
-                    throw new Error('Data menu tidak valid')
-                }
-                
-                // Menggunakan semua menu tanpa filter status
-                setMenuItems(menuResponse.data.menus)
-
-                // Fetch categories
-                const categoryResponse = await axios.get('/api/kategori')
-                console.log('Category data:', categoryResponse.data)
-                
-                if (!categoryResponse.data.kategoris) {
-                    throw new Error('Data kategori tidak valid')
-                }
-                
-                const categoryNames = ["Semua", ...categoryResponse.data.kategoris.map(cat => cat.nama_kategori)]
-                console.log('Category names:', categoryNames)
-                setCategories(categoryNames)
+                await fetchMenu()
+                await fetchCategories()
             } catch (error) {
                 console.error("Error fetching data:", error)
                 setError(error.response?.data?.message || error.message)

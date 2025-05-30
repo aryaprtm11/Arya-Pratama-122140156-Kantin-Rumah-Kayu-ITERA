@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -11,43 +10,28 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      console.log('Attempting login with:', { email, password });
-      
-      const response = await axios.post('http://localhost:6543/api/login', {
-        email,
-        password,
-      }, {
+      const response = await fetch('http://localhost:6543/api/login', {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        }
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
       });
       
-      console.log('Login response:', response.data);
+      const data = await response.json();
       
-      // Simpan token dan data user
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('userRole', response.data.user.role_name);
-      localStorage.setItem('userData', JSON.stringify(response.data.user));
-
-      // Cek role dan arahkan ke halaman yang sesuai
-      if (response.data.user.role_name === 'admin') {
-        navigate('/admin/dashboard');
+      if (response.ok) {
+        localStorage.setItem('token', data.token);
+        navigate('/order');
       } else {
-        navigate('/order'); // Arahkan ke halaman menu untuk pembeli
+        setError('Login failed. Please check your credentials.');
       }
-    } catch (err) {
-      console.error('Login error:', err);
-      if (err.response) {
-        console.error('Error response:', err.response);
-        setError(err.response.data?.error || 'Terjadi kesalahan saat login');
-      } else if (err.request) {
-        console.error('Error request:', err.request);
-        setError('Tidak dapat terhubung ke server');
-      } else {
-        console.error('Error:', err.message);
-        setError('Terjadi kesalahan saat login');
-      }
+    } catch (error) {
+      console.error('Error:', error);
+      setError('An error occurred during login.');
     }
   };
 

@@ -94,3 +94,61 @@ def user_delete_options(request):
         'Access-Control-Max-Age': '3600'
     })
     return {}
+
+@view_config(route_name='user_update', request_method='PUT', renderer='json')
+def user_update(request):
+    """View untuk mengupdate user"""
+    try:
+        # Add CORS headers
+        request.response.headers.update({
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'PUT',
+            'Access-Control-Allow-Headers': 'Content-Type,Accept,Authorization'
+        })
+
+        user_id = request.matchdict['id']
+        json_data = request.json_body
+        dbsession = request.dbsession
+        
+        # Cari user yang akan diupdate
+        user = dbsession.query(Users).filter_by(user_id=user_id).first()
+        
+        if user is None:
+            return HTTPNotFound(json_body={'error': 'User tidak ditemukan'})
+        
+        # Update user data
+        if 'nama_lengkap' in json_data:
+            user.nama_lengkap = json_data['nama_lengkap']
+        if 'email' in json_data:
+            user.email = json_data['email']
+        if 'role_id' in json_data:
+            user.role_id = json_data['role_id']
+        
+        dbsession.flush()
+        
+        return {
+            'success': True, 
+            'message': 'User berhasil diupdate',
+            'data': {
+                'user_id': user.user_id,
+                'nama_lengkap': user.nama_lengkap,
+                'email': user.email,
+                'role_id': user.role_id
+            }
+        }
+            
+    except Exception as e:
+        print("Error updating user:", str(e))
+        return HTTPBadRequest(json_body={'error': str(e)})
+
+@view_config(route_name='user_update', request_method='OPTIONS', renderer='json')
+def user_update_options(request):
+    """Handle OPTIONS request for CORS preflight"""
+    response = request.response
+    response.headers.update({
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'PUT',
+        'Access-Control-Allow-Headers': 'Content-Type,Accept,Authorization',
+        'Access-Control-Max-Age': '3600'
+    })
+    return {}
