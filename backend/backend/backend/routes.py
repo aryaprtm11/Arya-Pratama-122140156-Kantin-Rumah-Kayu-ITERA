@@ -27,6 +27,7 @@ def includeme(config):
     # User routes
     config.add_route('user_list', '/api/users', request_method='GET')
     config.add_route('user_detail', '/api/users/{id}', request_method='GET')
+    config.add_route('user_create', '/api/users', request_method='POST')
     config.add_route('user_update', '/api/users/{id}', request_method='PUT')
     config.add_route('user_delete', '/api/users/{id}', request_method='DELETE')
     

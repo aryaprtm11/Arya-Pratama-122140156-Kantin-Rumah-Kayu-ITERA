@@ -296,6 +296,68 @@ def user_register(request):
         return HTTPBadRequest(json_body={'error': str(e)})
 
 
+@view_config(route_name='user_create', request_method='POST', renderer='json')
+def user_create(request):
+    """View untuk admin membuat user baru"""
+    try:
+        # Add CORS headers
+        request.response.headers.update({
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'POST',
+            'Access-Control-Allow-Headers': 'Content-Type,Accept,Authorization'
+        })
+
+        print("Received user creation data:", request.json_body)  # Debug print
+        json_data = request.json_body
+        
+        required_fields = ['nama_lengkap', 'email', 'password', 'role_id']
+        for field in required_fields:
+            if field not in json_data:
+                return HTTPBadRequest(json_body={'error': f'Field {field} wajib diisi'})
+        
+        # Validasi email format
+        if not '@' in json_data['email']:
+            return HTTPBadRequest(json_body={'error': 'Format email tidak valid'})
+            
+        # Check email exists
+        dbsession = request.dbsession
+        existing_user = dbsession.query(Users).filter_by(email=json_data['email']).first()
+        if existing_user:
+            return HTTPBadRequest(json_body={'error': 'Email sudah terdaftar'})
+        
+        # Validasi password
+        if len(json_data['password']) < 6:
+            return HTTPBadRequest(json_body={'error': 'Password minimal 6 karakter'})
+        
+        # Validasi role_id
+        valid_roles = [1, 2]  # 1 = pembeli, 2 = admin
+        if json_data['role_id'] not in valid_roles:
+            return HTTPBadRequest(json_body={'error': 'Role ID tidak valid'})
+        
+        user = Users(
+            nama_lengkap=json_data['nama_lengkap'],
+            email=json_data['email'],
+            password=json_data['password'],  # Should be hashed in production
+            role_id=json_data['role_id'],
+            is_active=True
+        )
+        
+        dbsession.add(user)
+        dbsession.flush()
+        
+        return {
+            'success': True,
+            'message': 'User berhasil dibuat',
+            'user': user.to_dict()
+        }
+            
+    except Exception as e:
+        print("User creation error:", str(e))  # Debug print
+        import traceback
+        traceback.print_exc()
+        return HTTPBadRequest(json_body={'error': str(e)})
+
+
 # ===== ORDER VIEWS =====
 @view_config(route_name='order_list', renderer='json')
 def order_list(request):
@@ -485,6 +547,47 @@ def order_update(request):
             
     except Exception as e:
         print("Error updating order:", str(e))
+        return HTTPBadRequest(json_body={'error': str(e)})
+
+
+@view_config(route_name='order_delete', request_method='DELETE', renderer='json')
+def order_delete(request):
+    """View untuk menghapus pesanan"""
+    try:
+        # Add CORS headers
+        request.response.headers.update({
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'DELETE',
+            'Access-Control-Allow-Headers': 'Content-Type,Accept,Authorization'
+        })
+
+        order_id = request.matchdict['id']
+        dbsession = request.dbsession
+        
+        # Cari pesanan berdasarkan ID
+        order = dbsession.query(Orders).filter_by(order_id=order_id).first()
+        
+        if order is None:
+            return HTTPNotFound(json_body={'error': 'Pesanan tidak ditemukan'})
+        
+        # Hapus detail pesanan terlebih dahulu (foreign key constraint)
+        order_details = dbsession.query(OrderDetails).filter_by(order_id=order_id).all()
+        for detail in order_details:
+            dbsession.delete(detail)
+        
+        # Hapus pesanan
+        dbsession.delete(order)
+        dbsession.flush()
+        
+        return {
+            'success': True, 
+            'message': f'Pesanan #{order_id} berhasil dihapus'
+        }
+            
+    except Exception as e:
+        print("Error deleting order:", str(e))
+        import traceback
+        traceback.print_exc()
         return HTTPBadRequest(json_body={'error': str(e)})
 
 

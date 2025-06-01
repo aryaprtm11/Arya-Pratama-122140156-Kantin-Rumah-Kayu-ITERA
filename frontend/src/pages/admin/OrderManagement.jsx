@@ -127,6 +127,56 @@ const OrderManagement = () => {
     setIsModalOpen(true);
   };
 
+  const handleDeleteOrder = async (orderId, customerName) => {
+    try {
+      const result = await Swal.fire({
+        title: 'Apakah Anda yakin?',
+        text: `Pesanan dari "${customerName}" akan dihapus secara permanen!`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Ya, hapus!',
+        cancelButtonText: 'Batal'
+      });
+
+      if (result.isConfirmed) {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`http://localhost:6543/api/orders/${orderId}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Gagal menghapus pesanan');
+        }
+
+        // Update local state dengan menghapus pesanan yang sudah dihapus
+        const updatedOrders = orders.filter(order => order.order_id !== orderId);
+        setOrders(updatedOrders);
+
+        await Swal.fire({
+          icon: 'success',
+          title: 'Berhasil!',
+          text: 'Pesanan berhasil dihapus',
+          timer: 1500,
+          showConfirmButton: false
+        });
+      }
+    } catch (error) {
+      console.error('Error deleting order:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: `Gagal menghapus pesanan: ${error.message}`
+      });
+    }
+  };
+
   const getStatusStats = () => {
     const stats = {
       total: orders.length,
@@ -247,6 +297,7 @@ const OrderManagement = () => {
             loading={loading}
             onStatusUpdate={handleStatusUpdate}
             onViewDetails={handleViewDetails}
+            onDeleteOrder={handleDeleteOrder}
           />
 
           {/* Order Detail Modal */}

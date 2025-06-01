@@ -1,7 +1,7 @@
 import React from 'react';
 import { Icon } from '@iconify/react';
 
-const OrderTable = ({ orders, loading, onStatusUpdate, onViewDetails }) => {
+const OrderTable = ({ orders, loading, onStatusUpdate, onViewDetails, onDeleteOrder }) => {
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('id-ID', {
       style: 'currency',
@@ -146,6 +146,14 @@ const OrderTable = ({ orders, loading, onStatusUpdate, onViewDetails }) => {
                       >
                         <Icon icon="material-symbols:visibility" className="w-4 h-4 mr-1" />
                         Detail
+                      </button>
+                      <button
+                        onClick={() => onDeleteOrder(order.order_id, order.user.nama_lengkap)}
+                        className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                        title="Hapus pesanan"
+                      >
+                        <Icon icon="material-symbols:delete" className="w-4 h-4 mr-1" />
+                        Hapus
                       </button>
                     </div>
                   </td>
