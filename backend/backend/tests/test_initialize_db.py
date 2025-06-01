@@ -197,27 +197,24 @@ def test_main_operational_error(monkeypatch, capsys):
         assert "Pyramid is having a problem using your SQL database" in captured.out
 
 
-def test_main_with_real_argv():
+def test_main_with_real_argv(monkeypatch):
     """Test main dengan sys.argv default"""
-    original_argv = sys.argv
-    try:
-        sys.argv = ['progname', 'test.ini']
-        
-        with patch.object(setup_db, 'bootstrap') as mock_bootstrap, \
-             patch.object(setup_db, 'setup_logging') as mock_setup_logging, \
-             patch.object(setup_db, 'setup_models') as mock_setup_models:
-            
-            mock_request = MagicMock()
-            mock_bootstrap.return_value = {'request': mock_request}
-            
-            setup_db.main()
-            
-            mock_setup_logging.assert_called_once_with('test.ini')
-            mock_bootstrap.assert_called_once_with('test.ini')
-            mock_setup_models.assert_called_once_with(mock_request.dbsession)
+    # Mock sys.argv untuk test ini saja
+    monkeypatch.setattr(sys, 'argv', ['progname', 'test.ini'])
     
-    finally:
-        sys.argv = original_argv
+    with patch.object(setup_db, 'bootstrap') as mock_bootstrap, \
+         patch.object(setup_db, 'setup_logging') as mock_setup_logging, \
+         patch.object(setup_db, 'setup_models') as mock_setup_models:
+        
+        mock_request = MagicMock()
+        mock_bootstrap.return_value = {'request': mock_request}
+        
+        # Panggil main dengan argumen eksplisit bukan sys.argv yang di-mock
+        setup_db.main(['progname', 'test.ini'])
+        
+        mock_setup_logging.assert_called_once_with('test.ini')
+        mock_bootstrap.assert_called_once_with('test.ini')
+        mock_setup_models.assert_called_once_with(mock_request.dbsession)
 
 
 def test_kategori_creation_details():

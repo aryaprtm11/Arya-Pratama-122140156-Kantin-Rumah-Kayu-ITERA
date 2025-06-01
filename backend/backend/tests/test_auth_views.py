@@ -1,6 +1,7 @@
 import pytest
 from pyramid.testing import DummyRequest
 from pyramid.httpexceptions import HTTPBadRequest, HTTPNotFound
+from unittest.mock import patch
 
 from backend.views.auth import (
     login,
@@ -67,7 +68,10 @@ def test_login_success(dbsession, setup_users):
     req = DummyRequest(json_body=login_data)
     req.dbsession = dbsession
     
-    response = login(req)
+    # Mock uuid.uuid4() untuk mendapatkan token yang predictable
+    with patch('backend.views.auth.uuid.uuid4') as mock_uuid:
+        mock_uuid.return_value = 'dummy-token'
+        response = login(req)
     
     assert 'token' in response
     assert response['token'] == 'dummy-token'
